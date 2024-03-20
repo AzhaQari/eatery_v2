@@ -1,5 +1,8 @@
+import 'package:eatery/main.dart';
 import 'package:flutter/material.dart';
+import 'package:algolia/algolia.dart'; // Import Algolia library
 import 'package:eatery/widgets/bottom_app_bar.dart';
+import 'package:eatery/widgets/meal_card.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -8,11 +11,32 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late List<AlgoliaObjectSnapshot> _menuItems;
+  int _currentPage = 0;
+  int _itemsPerPage = 100; // Adjust the number of items per page as needed
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _menuItems = [];
+    _fetchMenuItems();
+  }
+
+  Future<void> _fetchMenuItems() async {
+    AlgoliaQuery query = algolia.instance.index('allmenuNutrition')
+        .query('')
+        .setHitsPerPage(_itemsPerPage)
+        .setPage(_currentPage);
+    AlgoliaQuerySnapshot snapshot = await query.getObjects();
+    setState(() {
+      _menuItems.addAll(snapshot.hits);
+    });
+  }
+
+  void _loadMoreItems() {
+    _currentPage++;
+    _fetchMenuItems();
   }
 
   @override
@@ -34,21 +58,39 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
           // Content based on selected tab
           Expanded(
             child: TabBarView(
-              controller: _tabController, // Assign the TabController
+              controller: _tabController,
               children: [
-                // Content for FYP tab
                 Placeholder(), // Placeholder for FYP tab
                 // Content for Explore tab
-                ListView.builder(
-                  itemCount: 10, // Example count
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text('Item $index'),
-                    );
+                NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                      _loadMoreItems();
+                      return true;
+                    }
+                    return false;
                   },
+                  child: ListView.builder(
+                    itemCount: _menuItems.length,
+                    itemBuilder: (context, index) {
+                      AlgoliaObjectSnapshot menuItem = _menuItems[index];
+                      // Handling "None" values
+                      String mealName = menuItem.data['item name'] ?? 'N/A';
+                      String restaurantName = menuItem.data['restaurant'] ?? 'N/A';
+                      int calories = (menuItem.data['calories'] is num) ? (menuItem.data['calories'] as num).toInt() : 0;
+                      int protein = (menuItem.data['protein'] is num) ? (menuItem.data['protein'] as num).toInt() : 0;
+                      return MealCard(
+                        mealName: mealName,
+                        restaurantName: restaurantName,
+                        calories: calories,
+                        protein: protein,
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
+
           ),
         ],
       ),

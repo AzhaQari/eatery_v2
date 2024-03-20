@@ -4,6 +4,7 @@ import 'package:eatery/screens/search_screen.dart';
 import 'package:eatery/screens/profile_screen.dart';
 import 'package:eatery/widgets/bottom_app_bar.dart';
 import 'package:eatery/theme.dart';
+import 'package:algolia/algolia.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,3 +25,8 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+final Algolia algolia = Algolia.init(
+  applicationId: '9EHWYVNJY9',
+  apiKey: 'e1baf96f6dce70195bbe680d1ac8047e',
+);
