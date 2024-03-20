@@ -8,12 +8,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String _name = 'John Doe';
-  double _weight = 70; // weight in kg
-  double _weeklyBudget = 100; // weekly budget in dollars
-  double _goalWeight = 65; // goal weight in kg
   String _age = '30';
   String _gender = 'Male';
-  String _weightUnit = 'kg';
+  int _selectedIndex = 0;
+  PageController _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -21,298 +19,263 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: Text('Profile'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ProfileField(
-              label: 'Name',
-              value: _name,
-              onTap: () {
-                _navigateToEditScreen(context, 'Name');
-              },
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(height: 20),
+                Text(
+                  'Welcome ${_name.split(' ')[0]}',
+                  style: TextStyle(
+                    fontSize: 24, // Increased font size
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20),
+                CircleAvatar(
+                  radius: 80,
+                  backgroundImage:
+                      AssetImage('assets/default_profile_image.jpg'),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditProfileScreen(),
+                      ),
+                    );
+                  },
+                  child: Text('Edit Profile'),
+                ),
+                SizedBox(height: 40),
+                _buildFloatingMenuBar(),
+                SizedBox(height: 20),
+                _buildPageView(),
+              ],
             ),
-            ProfileField(
-              label: 'Weight (${_weightUnit})',
-              value: _weight.toStringAsFixed(1),
-              onTap: () {
-                _navigateToEditScreen(context, 'Weight');
-              },
-              trailing: IconButton(
-                icon: Icon(Icons.swap_horiz),
-                onPressed: () {
-                  setState(() {
-                    _toggleWeightUnit();
-                  });
-                },
-              ),
-            ),
-            ProfileField(
-              label: 'Weekly Budget (\$)',
-              value: _weeklyBudget.toStringAsFixed(2),
-              onTap: () {
-                _navigateToEditScreen(context, 'Weekly Budget');
-              },
-            ),
-            ProfileField(
-              label: 'Goal Weight (${_weightUnit})',
-              value: _goalWeight.toStringAsFixed(1),
-              onTap: () {
-                _navigateToEditScreen(context, 'Goal Weight');
-              },
-              trailing: IconButton(
-                icon: Icon(Icons.swap_horiz),
-                onPressed: () {
-                  setState(() {
-                    _toggleWeightUnit();
-                  });
-                },
-              ),
-            ),
-            ProfileField(
-              label: 'Age',
-              value: _age,
-              onTap: () {
-                _navigateToEditScreen(context, 'Age');
-              },
-            ),
-            ProfileField(
-              label: 'Gender',
-              value: _gender,
-              onTap: () {
-                _navigateToGenderSelection(context);
-              },
-            ),
-            SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle save functionality here if needed
-                },
-                child: Text('Save'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-      bottomNavigationBar: BottomAppBarWidget(), // Add the bottom app bar
+      bottomNavigationBar: BottomAppBarWidget(),
     );
   }
 
-  void _navigateToEditScreen(BuildContext context, String field) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditProfileScreen(
-          field: field,
-          initialValue: _getFieldValue(field),
-        ),
-      ),
-    ).then((updatedValue) {
-      if (updatedValue != null) {
+  Widget _buildFloatingMenuBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildMenuItem('Your Eats', index: 0),
+        _buildMenuItem('Your Goals', index: 1),
+        _buildMenuItem('Your Menus', index: 2), // Changed to 'Your Menus'
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(String title, {required int index}) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () {
         setState(() {
-          _updateFieldValue(field, updatedValue);
+          _selectedIndex = index;
+          _pageController.animateToPage(
+            index,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
         });
-      }
-    });
-  }
-
-  String _getFieldValue(String field) {
-    switch (field) {
-      case 'Name':
-        return _name;
-      case 'Weight':
-        return _weight.toStringAsFixed(1);
-      case 'Weekly Budget':
-        return _weeklyBudget.toStringAsFixed(2);
-      case 'Goal Weight':
-        return _goalWeight.toStringAsFixed(1);
-      case 'Age':
-        return _age;
-      default:
-        return '';
-    }
-  }
-
-  void _updateFieldValue(String field, String updatedValue) {
-    switch (field) {
-      case 'Name':
-        _name = updatedValue;
-        break;
-      case 'Weight':
-        _weight = double.parse(updatedValue);
-        break;
-      case 'Weekly Budget':
-        _weeklyBudget = double.parse(updatedValue);
-        break;
-      case 'Goal Weight':
-        _goalWeight = double.parse(updatedValue);
-        break;
-      case 'Age':
-        _age = updatedValue;
-        break;
-    }
-  }
-
-  void _navigateToGenderSelection(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(child: Text('Select Gender')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _gender = 'Male';
-                  });
-                  Navigator.of(context).pop();
-                },
-                child: Text('Male'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _gender = 'Female';
-                  });
-                  Navigator.of(context).pop();
-                },
-                child: Text('Female'),
-              ),
-            ],
-          ),
-        );
       },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: isSelected
+                ? Colors.black
+                : Colors.grey, // Change text color based on selection
+            fontWeight: FontWeight.bold,
+            fontSize:
+                isSelected ? 18 : 16, // Change font size based on selection
+          ),
+        ),
+      ),
     );
   }
 
-  void _toggleWeightUnit() {
-    setState(() {
-      if (_weightUnit == 'kg') {
-        _weight = _convertToPounds(_weight);
-        _goalWeight = _convertToPounds(_goalWeight);
-        _weightUnit = 'lb';
-      } else {
-        _weight = _convertToKilograms(_weight);
-        _goalWeight = _convertToKilograms(_goalWeight);
-        _weightUnit = 'kg';
-      }
-    });
-  }
-
-  double _convertToPounds(double weightInKg) {
-    return weightInKg * 2.20462;
-  }
-
-  double _convertToKilograms(double weightInLb) {
-    return weightInLb / 2.20462;
-  }
-}
-
-class ProfileField extends StatelessWidget {
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-  final Widget? trailing;
-
-  const ProfileField({
-    Key? key,
-    required this.label,
-    required this.value,
-    required this.onTap,
-    this.trailing,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: ListTile(
-          title: Text(
-            '$label: ',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+  Widget _buildPageView() {
+    return SizedBox(
+      height: 300,
+      child: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: [
+          // Your Eats section
+          Container(
+            color: Colors.green,
+            child: Center(
+              child: Text(
+                'Your Eats',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
-          subtitle: Row(
-            children: [
-              Expanded(
-                child: Text(value),
+          // Your Goals section
+          Container(
+            color: Colors.orange,
+            child: Center(
+              child: Text(
+                'Your Goals',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              if (trailing != null) trailing!,
-            ],
+            ),
           ),
-          trailing: Icon(Icons.edit),
-        ),
+          // Your Menus section
+          Container(
+            color: Colors.purple,
+            child: Center(
+              child: Text(
+                'Your Menus',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class EditProfileScreen extends StatefulWidget {
-  final String field;
-  final String initialValue;
-
-  const EditProfileScreen({
-    Key? key,
-    required this.field,
-    required this.initialValue,
-  }) : super(key: key);
-
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.initialValue);
-  }
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _birthdayController = TextEditingController();
+  TextEditingController _sexController = TextEditingController();
+  TextEditingController _heightController = TextEditingController();
+  TextEditingController _bodyFatController = TextEditingController();
+  TextEditingController _activityController = TextEditingController();
+  TextEditingController _exerciseController = TextEditingController();
+  TextEditingController _cardioController = TextEditingController();
+  TextEditingController _liftingController = TextEditingController();
+  TextEditingController _subscriptionController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _dataPrivacyController = TextEditingController();
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit ${widget.field}'),
+        title: Text('Edit Profile'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _controller,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: 'Enter new ${widget.field.toLowerCase()}',
-              ),
-            ),
-            SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context, _controller.text);
-                },
-                child: Text('Save'),
-              ),
-            ),
-          ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildFloatingMenuBar(),
+          Expanded(
+            child: _buildPageView(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingMenuBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildMenuItem('General', index: 0),
+        _buildMenuItem('Goal Data', index: 1),
+        _buildMenuItem('Account', index: 2),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(String title, {required int index}) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.grey,
+            fontWeight: FontWeight.bold,
+            fontSize: isSelected ? 18 : 16,
+          ),
         ),
       ),
     );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Widget _buildPageView() {
+    switch (_selectedIndex) {
+      case 0:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProfileTextField('Name', _nameController),
+            _buildProfileTextField('Email', _emailController),
+            _buildProfileTextField('Birthday', _birthdayController),
+            _buildProfileTextField('Sex', _sexController),
+            _buildProfileTextField('Height', _heightController),
+          ],
+        );
+      case 1:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProfileTextField('Body Fat', _bodyFatController),
+            _buildProfileTextField('Activity', _activityController),
+            _buildProfileTextField('Exercise', _exerciseController),
+            _buildProfileTextField('Cardio', _cardioController),
+            _buildProfileTextField('Lifting', _liftingController),
+          ],
+        );
+      case 2:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProfileTextField('Subscription', _subscriptionController),
+            _buildProfileTextField('Password', _passwordController),
+            _buildProfileTextField('Data & Privacy', _dataPrivacyController),
+            _buildProfileTextField('Sign Out',
+                TextEditingController()), // Placeholder for Sign Out
+          ],
+        );
+      default:
+        return SizedBox(); // Return empty container if index is out of bounds
+    }
+  }
+
+  Widget _buildProfileTextField(
+      String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+        ),
+      ),
+    );
   }
 }
