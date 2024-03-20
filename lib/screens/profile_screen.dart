@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:eatery/widgets/bottom_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -30,7 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   'Welcome ${_name.split(' ')[0]}',
                   style: TextStyle(
-                    fontSize: 24, // Increased font size
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -71,7 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         _buildMenuItem('Your Eats', index: 0),
         _buildMenuItem('Your Goals', index: 1),
-        _buildMenuItem('Your Menus', index: 2), // Changed to 'Your Menus'
+        _buildMenuItem('Your Menus', index: 2),
       ],
     );
   }
@@ -94,12 +95,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Text(
           title,
           style: TextStyle(
-            color: isSelected
-                ? Colors.black
-                : Colors.grey, // Change text color based on selection
+            color: isSelected ? Colors.black : Colors.grey,
             fontWeight: FontWeight.bold,
-            fontSize:
-                isSelected ? 18 : 16, // Change font size based on selection
+            fontSize: isSelected ? 18 : 16,
           ),
         ),
       ),
@@ -117,7 +115,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           });
         },
         children: [
-          // Your Eats section
           Container(
             color: Colors.green,
             child: Center(
@@ -127,7 +124,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          // Your Goals section
           Container(
             color: Colors.orange,
             child: Center(
@@ -137,7 +133,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          // Your Menus section
           Container(
             color: Colors.purple,
             child: Center(
@@ -159,19 +154,12 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  TextEditingController _nameController = TextEditingController();
+  TextEditingController _firstNameController = TextEditingController();
+  TextEditingController _lastNameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _birthdayController = TextEditingController();
-  TextEditingController _sexController = TextEditingController();
   TextEditingController _heightController = TextEditingController();
-  TextEditingController _bodyFatController = TextEditingController();
-  TextEditingController _activityController = TextEditingController();
-  TextEditingController _exerciseController = TextEditingController();
-  TextEditingController _cardioController = TextEditingController();
-  TextEditingController _liftingController = TextEditingController();
-  TextEditingController _subscriptionController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _dataPrivacyController = TextEditingController();
+  TextEditingController _sexController = TextEditingController();
   int _selectedIndex = 0;
 
   @override
@@ -185,7 +173,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         children: [
           _buildFloatingMenuBar(),
           Expanded(
-            child: _buildPageView(),
+            child: _buildPageView(Theme.of(context).platform),
           ),
         ],
       ),
@@ -225,39 +213,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildPageView() {
+  Widget _buildPageView(TargetPlatform platform) {
     switch (_selectedIndex) {
       case 0:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildProfileTextField('Name', _nameController),
-            _buildProfileTextField('Email', _emailController),
-            _buildProfileTextField('Birthday', _birthdayController),
-            _buildProfileTextField('Sex', _sexController),
-            _buildProfileTextField('Height', _heightController),
+            _buildProfileTextField(
+                'First Name', _firstNameController, platform),
+            _buildProfileTextField('Last Name', _lastNameController, platform),
+            _buildProfileTextField('Email', _emailController, platform),
+            _buildProfileDatePicker('Birthday', _birthdayController, platform),
+            _buildProfileHeightPicker('Height', _heightController, platform),
+            _buildProfileSexPicker(platform),
           ],
         );
       case 1:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildProfileTextField('Body Fat', _bodyFatController),
-            _buildProfileTextField('Activity', _activityController),
-            _buildProfileTextField('Exercise', _exerciseController),
-            _buildProfileTextField('Cardio', _cardioController),
-            _buildProfileTextField('Lifting', _liftingController),
+            _buildProfileTextField(
+                'Body Fat', TextEditingController(), platform),
+            _buildProfileTextField(
+                'Activity', TextEditingController(), platform),
+            _buildProfileTextField(
+                'Exercise', TextEditingController(), platform),
+            _buildProfileTextField('Cardio', TextEditingController(), platform),
+            _buildProfileTextField(
+                'Lifting', TextEditingController(), platform),
           ],
         );
       case 2:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildProfileTextField('Subscription', _subscriptionController),
-            _buildProfileTextField('Password', _passwordController),
-            _buildProfileTextField('Data & Privacy', _dataPrivacyController),
-            _buildProfileTextField('Sign Out',
-                TextEditingController()), // Placeholder for Sign Out
+            _buildProfileTextField(
+                'Subscription', TextEditingController(), platform),
+            _buildProfileTextField(
+                'Password', TextEditingController(), platform),
+            _buildProfileTextField(
+                'Data & Privacy', TextEditingController(), platform),
+            _buildProfileTextField('Sign Out', TextEditingController(),
+                platform), // Placeholder for Sign Out
           ],
         );
       default:
@@ -266,14 +263,219 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildProfileTextField(
-      String label, TextEditingController controller) {
+      String label, TextEditingController controller, TargetPlatform platform) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
+      child: platform == TargetPlatform.iOS
+          ? _buildCupertinoTextField(label, controller)
+          : _buildMaterialTextField(label, controller),
+    );
+  }
+
+  Widget _buildMaterialTextField(
+      String label, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildCupertinoTextField(
+      String label, TextEditingController controller) {
+    return CupertinoTextField(
+      controller: controller,
+      placeholder: label,
+    );
+  }
+
+  Widget _buildProfileDatePicker(
+      String label, TextEditingController controller, TargetPlatform platform) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: platform == TargetPlatform.iOS
+          ? _buildCupertinoDatePicker(label, controller)
+          : _buildMaterialDatePicker(label, controller),
+    );
+  }
+
+  Widget _buildMaterialDatePicker(
+      String label, TextEditingController controller) {
+    return TextField(
+      readOnly: true,
+      controller: controller,
+      onTap: () async {
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(1900),
+          lastDate: DateTime.now(),
+        );
+        if (pickedDate != null) {
+          controller.text = pickedDate.toString();
+        }
+      },
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildCupertinoDatePicker(
+      String label, TextEditingController controller) {
+    return GestureDetector(
+      onTap: () async {
+        DateTime? pickedDate = await showCupertinoModalPopup<DateTime>(
+          context: context,
+          builder: (BuildContext context) {
+            return SizedBox(
+              height: 200,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: DateTime.now(),
+                onDateTimeChanged: (DateTime dateTime) {
+                  controller.text = dateTime.toString();
+                },
+              ),
+            );
+          },
+        );
+        if (pickedDate != null) {
+          controller.text = pickedDate.toString();
+        }
+      },
+      child: AbsorbPointer(
+        child: CupertinoTextField(
+          controller: controller,
+          placeholder: label,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileSexPicker(TargetPlatform platform) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: platform == TargetPlatform.iOS
+          ? _buildCupertinoSexPicker()
+          : _buildMaterialSexPicker(),
+    );
+  }
+
+  Widget _buildMaterialSexPicker() {
+    return Row(
+      children: [
+        Text('Sex:'),
+        SizedBox(width: 10),
+        DropdownButton<String>(
+          items: <String>['Male', 'Female'].map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? value) {
+            setState(() {
+              _sexController.text = value!;
+            });
+          },
+          value: _sexController.text,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCupertinoSexPicker() {
+    return GestureDetector(
+      onTap: () async {
+        List<String> sexes = ['Male', 'Female'];
+        final result = await showCupertinoModalPopup(
+          context: context,
+          builder: (BuildContext context) {
+            return CupertinoPicker(
+              itemExtent: 32.0,
+              onSelectedItemChanged: (int index) {
+                setState(() {
+                  _sexController.text = sexes[index];
+                });
+              },
+              children: sexes.map((String sex) {
+                return Text(sex);
+              }).toList(),
+            );
+          },
+        );
+        if (result != null) {
+          setState(() {
+            _sexController.text = sexes[result];
+          });
+        }
+      },
+      child: AbsorbPointer(
+        child: CupertinoTextField(
+          controller: _sexController,
+          placeholder: 'Select Gender',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileHeightPicker(
+      String label, TextEditingController controller, TargetPlatform platform) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: platform == TargetPlatform.iOS
+          ? _buildCupertinoHeightPicker(label, controller)
+          : _buildMaterialHeightPicker(label, controller),
+    );
+  }
+
+  Widget _buildMaterialHeightPicker(
+      String label, TextEditingController controller) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: label,
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        SizedBox(width: 10),
+        DropdownButton<String>(
+          items: <String>['cm', 'ft/in'].map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? value) {
+            setState(() {
+              // Handle unit change
+            });
+          },
+          value: 'cm', // Default unit
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCupertinoHeightPicker(
+      String label, TextEditingController controller) {
+    return GestureDetector(
+      onTap: () async {
+        // Implement Cupertino height picker
+      },
+      child: AbsorbPointer(
+        child: CupertinoTextField(
+          controller: controller,
+          placeholder: label,
         ),
       ),
     );
