@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:eatery/theme.dart';
 
 class MealCard extends StatelessWidget {
   final String mealName;
@@ -15,6 +16,9 @@ class MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int colorIndex = mealName.length % menuItemColors.length;
+    final Color cardColor = menuItemColors[colorIndex];
+
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
@@ -23,17 +27,19 @@ class MealCard extends StatelessWidget {
             restaurantName: restaurantName,
             calories: calories,
             protein: protein,
+            cardColor: cardColor, // Pass cardColor to MealDetailsScreen
           ),
         ));
       },
       child: Hero(
-        tag: mealName, // Unique tag for each meal card
+        tag: mealName,
         child: Card(
           margin: EdgeInsets.all(8.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ),
           elevation: 3,
+          color: cardColor,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -44,6 +50,7 @@ class MealCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 SizedBox(height: 5),
@@ -51,7 +58,7 @@ class MealCard extends StatelessWidget {
                   'Restaurant: $restaurantName',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey[600],
+                    color: Colors.white70,
                   ),
                 ),
                 SizedBox(height: 10),
@@ -63,6 +70,7 @@ class MealCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
@@ -70,6 +78,7 @@ class MealCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -88,19 +97,21 @@ class MealDetailsScreen extends StatelessWidget {
   final String restaurantName;
   final int calories;
   final int protein;
+  final Color cardColor; // Add cardColor property
 
   const MealDetailsScreen({
     required this.mealName,
     required this.restaurantName,
     required this.calories,
     required this.protein,
+    required this.cardColor, // Receive cardColor
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pop(); // Navigate back when tapped outside
+        Navigator.of(context).pop();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -108,7 +119,7 @@ class MealDetailsScreen extends StatelessWidget {
         ),
         body: Center(
           child: Hero(
-            tag: mealName, // Same tag as the MealCard
+            tag: mealName,
             child: Material(
               type: MaterialType.transparency,
               child: Card(
@@ -117,6 +128,7 @@ class MealDetailsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20.0),
                 ),
                 elevation: 5,
+                color: cardColor, // Use cardColor here
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: Padding(
@@ -136,7 +148,7 @@ class MealDetailsScreen extends StatelessWidget {
                           'Restaurant: $restaurantName',
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.grey[600],
+                            color: darkColor,
                           ),
                         ),
                         SizedBox(height: 10),
