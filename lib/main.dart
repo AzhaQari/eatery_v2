@@ -1,3 +1,5 @@
+import 'package:eatery/screens/login_screen.dart';
+import 'package:eatery/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:eatery/screens/home_screen.dart';
 import 'package:eatery/screens/search_screen.dart';
@@ -32,8 +34,8 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomeScreen(),
         '/search': (context) => SearchScreen(),
         '/profile': (context) => ProfileScreen(),
-        // '/signup': (context) => SignupPage(),
-        // '/login': (context) => LoginPage(), // Add LoginPage route
+        '/signup': (context) => SignupPage(),
+        '/login': (context) => LoginPage(), // Add LoginPage route
       },
     );
   }
