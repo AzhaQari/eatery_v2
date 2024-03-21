@@ -57,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildFloatingMenuBar(),
                 SizedBox(height: 20),
                 _buildPageView(),
+                YourGoalsSection(),
               ],
             ),
           ),
@@ -146,6 +147,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  Widget _buildProfileTextField(
+      String label, TextEditingController controller, TargetPlatform platform) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: platform == TargetPlatform.iOS
+          ? _buildCupertinoTextField(label, controller)
+          : _buildMaterialTextField(label, controller),
+    );
+  }
+
+  Widget _buildMaterialTextField(
+      String label, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildCupertinoTextField(
+      String label, TextEditingController controller) {
+    return CupertinoTextField(
+      controller: controller,
+      placeholder: label,
+    );
+  }
 }
 
 class EditProfileScreen extends StatefulWidget {
@@ -159,6 +189,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _birthdayController = TextEditingController();
   TextEditingController _heightController = TextEditingController();
+  TextEditingController _weightController = TextEditingController();
   TextEditingController _sexController = TextEditingController();
   int _selectedIndex = 0;
 
@@ -225,6 +256,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _buildProfileTextField('Email', _emailController, platform),
             _buildProfileDatePicker('Birthday', _birthdayController, platform),
             _buildProfileHeightPicker('Height', _heightController, platform),
+            _buildProfileWeightPicker('Weight', _weightController, platform),
             _buildProfileSexPicker(platform),
           ],
         );
@@ -356,6 +388,82 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  Widget _buildProfileHeightPicker(
+      String label, TextEditingController controller, TargetPlatform platform) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: platform == TargetPlatform.iOS
+          ? _buildCupertinoHeightPicker(label, controller)
+          : _buildMaterialHeightPicker(label, controller),
+    );
+  }
+
+  Widget _buildMaterialHeightPicker(
+      String label, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildCupertinoHeightPicker(
+      String label, TextEditingController controller) {
+    return GestureDetector(
+      onTap: () {
+        // Implement height picker logic for Cupertino
+      },
+      child: AbsorbPointer(
+        child: CupertinoTextField(
+          controller: controller,
+          placeholder: label,
+          keyboardType: TextInputType.number,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileWeightPicker(
+      String label, TextEditingController controller, TargetPlatform platform) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: platform == TargetPlatform.iOS
+          ? _buildCupertinoWeightPicker(label, controller)
+          : _buildMaterialWeightPicker(label, controller),
+    );
+  }
+
+  Widget _buildMaterialWeightPicker(
+      String label, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildCupertinoWeightPicker(
+      String label, TextEditingController controller) {
+    return GestureDetector(
+      onTap: () {
+        // Implement weight picker logic for Cupertino
+      },
+      child: AbsorbPointer(
+        child: CupertinoTextField(
+          controller: controller,
+          placeholder: label,
+          keyboardType: TextInputType.number,
+        ),
+      ),
+    );
+  }
+
   Widget _buildProfileSexPicker(TargetPlatform platform) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -422,62 +530,131 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
     );
   }
+}
 
-  Widget _buildProfileHeightPicker(
-      String label, TextEditingController controller, TargetPlatform platform) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: platform == TargetPlatform.iOS
-          ? _buildCupertinoHeightPicker(label, controller)
-          : _buildMaterialHeightPicker(label, controller),
-    );
-  }
-
-  Widget _buildMaterialHeightPicker(
-      String label, TextEditingController controller) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: label,
-              border: OutlineInputBorder(),
+class YourProgressWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.green[100],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Your Progress',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'placeholder',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'weight',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          TextButton(
+            onPressed: () {
+              // Implement action when 'show more' is pressed
+            },
+            child: Text(
+              'Show More',
+              style: TextStyle(decoration: TextDecoration.underline),
             ),
           ),
-        ),
-        SizedBox(width: 10),
-        DropdownButton<String>(
-          items: <String>['cm', 'ft/in'].map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (String? value) {
-            setState(() {
-              // Handle unit change
-            });
-          },
-          value: 'cm', // Default unit
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCupertinoHeightPicker(
-      String label, TextEditingController controller) {
-    return GestureDetector(
-      onTap: () async {
-        // Implement Cupertino height picker
-      },
-      child: AbsorbPointer(
-        child: CupertinoTextField(
-          controller: controller,
-          placeholder: label,
-        ),
+        ],
       ),
     );
   }
+}
+
+class YourBudgetWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.blue[100],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Your Budget',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'placeholder',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'budget',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          TextButton(
+            onPressed: () {
+              // Implement action when 'show more' is pressed
+            },
+            child: Text(
+              'Show More',
+              style: TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class YourGoalsSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Text(
+            'Your Budget',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        YourBudgetWidget(),
+        SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Text(
+            'Your Progress',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        YourProgressWidget(),
+      ],
+    );
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: ProfileScreen(),
+  ));
 }
