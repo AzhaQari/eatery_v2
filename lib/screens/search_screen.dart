@@ -1,4 +1,5 @@
 import 'package:eatery/main.dart';
+import 'package:eatery/widgets/search_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:algolia/algolia.dart'; // Import Algolia library
 import 'package:eatery/widgets/bottom_app_bar.dart';
@@ -9,7 +10,7 @@ class SearchScreen extends StatefulWidget {
   _SearchScreenState createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderStateMixin {
+class _SearchScreenState extends State<SearchScreen> with TickerProviderStateMixin {
   late TabController _tabController;
   late List<AlgoliaObjectSnapshot> _menuItems;
   int _currentPage = 0;
@@ -43,8 +44,20 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search'),
+        title: Text('Find Your Food'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SearchResultsScreen()),
+              );
+            },
+          ),
+        ],
       ),
+
       body: Column(
         children: [
           // Tabs for explore and FYP
