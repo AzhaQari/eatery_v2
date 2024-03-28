@@ -9,7 +9,8 @@ class SearchScreen extends StatefulWidget {
   _SearchScreenState createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderStateMixin {
+class _SearchScreenState extends State<SearchScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late List<AlgoliaObjectSnapshot> _menuItems;
   int _currentPage = 0;
@@ -24,7 +25,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   }
 
   Future<void> _fetchMenuItems() async {
-    AlgoliaQuery query = algolia.instance.index('allmenuNutrition')
+    AlgoliaQuery query = algolia.instance
+        .index('allmenuNutrition')
         .query('')
         .setHitsPerPage(_itemsPerPage)
         .setPage(_currentPage);
@@ -64,7 +66,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 // Content for Explore tab
                 NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo) {
-                    if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                    if (scrollInfo.metrics.pixels ==
+                        scrollInfo.metrics.maxScrollExtent) {
                       _loadMoreItems();
                       return true;
                     }
@@ -76,9 +79,14 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                       AlgoliaObjectSnapshot menuItem = _menuItems[index];
                       // Handling "None" values
                       String mealName = menuItem.data['item name'] ?? 'N/A';
-                      String restaurantName = menuItem.data['restaurant'] ?? 'N/A';
-                      int calories = (menuItem.data['calories'] is num) ? (menuItem.data['calories'] as num).toInt() : 0;
-                      int protein = (menuItem.data['protein'] is num) ? (menuItem.data['protein'] as num).toInt() : 0;
+                      String restaurantName =
+                          menuItem.data['restaurant'] ?? 'N/A';
+                      int calories = (menuItem.data['calories'] is num)
+                          ? (menuItem.data['calories'] as num).toInt()
+                          : 0;
+                      int protein = (menuItem.data['protein'] is num)
+                          ? (menuItem.data['protein'] as num).toInt()
+                          : 0;
                       return MealCard(
                         mealName: mealName,
                         restaurantName: restaurantName,
@@ -90,7 +98,6 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 ),
               ],
             ),
-
           ),
         ],
       ),
@@ -100,7 +107,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
 
   @override
   void dispose() {
-    _tabController.dispose(); // Dispose the TabController to prevent memory leaks
+    _tabController
+        .dispose(); // Dispose the TabController to prevent memory leaks
     super.dispose();
   }
 }
