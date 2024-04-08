@@ -1,8 +1,9 @@
 import 'package:eatery/main.dart';
 import 'package:flutter/material.dart';
 import 'package:algolia/algolia.dart'; // Import Algolia library
-import 'package:eatery/widgets/bottom_app_bar.dart';
+import 'package:eatery/meal_model.dart';
 import 'package:eatery/widgets/meal_card.dart';
+import 'package:eatery/widgets/bottom_app_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -12,15 +13,14 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late List<AlgoliaObjectSnapshot> _menuItems;
+  List<Meal> _meals = []; // Now stores Meal objects
   int _currentPage = 0;
-  int _itemsPerPage = 100; // Adjust the number of items per page as needed
+  int _itemsPerPage = 100;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _menuItems = [];
     _fetchMenuItems();
   }
 
@@ -32,13 +32,15 @@ class _SearchScreenState extends State<SearchScreen>
         .setPage(_currentPage);
     AlgoliaQuerySnapshot snapshot = await query.getObjects();
     setState(() {
-      _menuItems.addAll(snapshot.hits);
+      _meals = snapshot.hits
+          .map((hit) => Meal(
+                name: hit.data['item name'] ?? 'N/A',
+                restaurant: hit.data['restaurant'] ?? 'N/A',
+                calories: hit.data['calories'] ?? 0,
+                protein: hit.data['protein'] ?? 0,
+              ))
+          .toList();
     });
-  }
-
-  void _loadMoreItems() {
-    _currentPage++;
-    _fetchMenuItems();
   }
 
   @override
@@ -49,21 +51,15 @@ class _SearchScreenState extends State<SearchScreen>
       ),
       body: Column(
         children: [
-          // Tabs for explore and FYP
           TabBar(
-            controller: _tabController, // Assign the TabController
-            tabs: [
-              Tab(text: 'FYP'), // FYP tab on the right
-              Tab(text: 'Explore'), // Explore tab on the left
-            ],
+            controller: _tabController,
+            tabs: [Tab(text: 'FYP'), Tab(text: 'Explore')],
           ),
-          // Content based on selected tab
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
                 Placeholder(), // Placeholder for FYP tab
-                // Content for Explore tab
                 NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo) {
                     if (scrollInfo.metrics.pixels ==
@@ -74,24 +70,12 @@ class _SearchScreenState extends State<SearchScreen>
                     return false;
                   },
                   child: ListView.builder(
-                    itemCount: _menuItems.length,
+                    itemCount: _meals.length,
                     itemBuilder: (context, index) {
-                      AlgoliaObjectSnapshot menuItem = _menuItems[index];
-                      // Handling "None" values
-                      String mealName = menuItem.data['item name'] ?? 'N/A';
-                      String restaurantName =
-                          menuItem.data['restaurant'] ?? 'N/A';
-                      int calories = (menuItem.data['calories'] is num)
-                          ? (menuItem.data['calories'] as num).toInt()
-                          : 0;
-                      int protein = (menuItem.data['protein'] is num)
-                          ? (menuItem.data['protein'] as num).toInt()
-                          : 0;
                       return MealCard(
-                        mealName: mealName,
-                        restaurantName: restaurantName,
-                        calories: calories,
-                        protein: protein,
+                        meal: _meals[index],
+                        meals: _meals,
+                        index: index,
                       );
                     },
                   ),
@@ -101,14 +85,18 @@ class _SearchScreenState extends State<SearchScreen>
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBarWidget(), // Add the bottom app bar
+      bottomNavigationBar: BottomAppBarWidget(), // Your BottomAppBarWidget
     );
+  }
+
+  void _loadMoreItems() {
+    _currentPage++;
+    _fetchMenuItems();
   }
 
   @override
   void dispose() {
-    _tabController
-        .dispose(); // Dispose the TabController to prevent memory leaks
+    _tabController.dispose();
     super.dispose();
   }
 }
