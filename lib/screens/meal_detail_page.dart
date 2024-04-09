@@ -77,7 +77,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
                     children: [
                       Expanded(
                           child:
-                              NutritionalInfoBox(label: 'Spent', value: '\$X')),
+                              NutritionalInfoBox(label: 'Price', value: '\$X')),
                       SizedBox(width: 8), // Spacing between boxes
                       Expanded(
                           child: NutritionalInfoBox(
@@ -87,7 +87,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
                           child: NutritionalInfoBox(
                               label: 'Protein', value: '${meal.protein}g')),
                       SizedBox(width: 8), // Spacing between boxes
-                      Expanded(child: ShareButton()),
+                      Expanded(child: TrackButton()),
                     ],
                   ),
                 ),
@@ -138,22 +138,48 @@ class NutritionalInfoBox extends StatelessWidget {
   }
 }
 
-class ShareButton extends StatelessWidget {
+class TrackButton extends StatefulWidget {
+  @override
+  _TrackButtonState createState() => _TrackButtonState();
+}
+
+class _TrackButtonState extends State<TrackButton> {
+  bool _isTracked = false; // Initial state of tracking
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[850],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.share, color: Colors.white, size: 24),
-          SizedBox(height: 4),
-          Text('Share', style: TextStyle(fontSize: 16, color: Colors.white60)),
-        ],
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _isTracked = !_isTracked; // Toggle the tracked state
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey[850],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _isTracked
+                  ? Icons.check_circle
+                  : Icons
+                      .add_circle_outline, // Conditional icon based on tracking state
+              color: _isTracked
+                  ? Colors.lightGreen
+                  : Colors.white, // Conditional color based on tracking state
+              size: 24,
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Track',
+              style: TextStyle(fontSize: 16, color: Colors.white60),
+            ),
+          ],
+        ),
       ),
     );
   }
