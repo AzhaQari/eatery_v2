@@ -97,4 +97,4 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "lib/images/EatAppLogo.png"
+  image_path: "lib/images/EatAppLogo1.png"
