@@ -139,8 +139,13 @@ class NutritionalInfoBox extends StatelessWidget {
 }
 
 class TrackButton extends StatefulWidget {
-  @override
-  _TrackButtonState createState() => _TrackButtonState();
+  final Meal meal;
+  final Function(Meal) onTrack;
+
+  TrackButton({Key? key, required this.meal, required this.onTrack})
+      : super(key: key);
+
+  // ... rest of your TrackButton code
 }
 
 class _TrackButtonState extends State<TrackButton> {
@@ -153,6 +158,9 @@ class _TrackButtonState extends State<TrackButton> {
         setState(() {
           _isTracked = !_isTracked; // Toggle the tracked state
         });
+        if (_isTracked) {
+          widget.onTrack(widget.meal); // Notify when a meal is tracked
+        }
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12),

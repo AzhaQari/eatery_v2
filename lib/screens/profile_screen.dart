@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:eatery/widgets/bottom_app_bar.dart';
 
-class ProfileScreen extends StatefulWidget {
-  @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+class _ProfileScreenState extends State<ProfileScreen> {
+  List<Meal> trackedMeals = []; // This holds the list of tracked meals
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
