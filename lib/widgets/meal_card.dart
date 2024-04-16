@@ -106,3 +106,12 @@ class MealCard extends StatelessWidget {
     );
   }
 }
+
+
+// trackedMeals should be an array that holds meal-card maps. each map in this list should have the following attributes:
+//
+// -> mealPrice (int)
+// -> mealName (string)
+// -> mealCalories (int)
+// -> mealProtein (int)
+// -> mealRestaurant (string)
