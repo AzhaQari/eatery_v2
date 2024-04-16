@@ -26,6 +26,13 @@ class _SearchFeedScreenState extends State<SearchFeedScreen> {
   }
 
   Future<void> _searchMeals(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredMeals = []; // Clear results when query is empty
+      });
+      return;
+    }
+
     AlgoliaQuery searchQuery = algolia.instance
         .index('allmenuNutrition')
         .query(query)
@@ -33,7 +40,7 @@ class _SearchFeedScreenState extends State<SearchFeedScreen> {
     AlgoliaQuerySnapshot snapshot = await searchQuery.getObjects();
 
     // Convert Algolia hits to Meal objects
-    List<Meal> filteredMeals = snapshot.hits
+    List<Meal> newMeals = snapshot.hits
         .map((hit) => Meal(
       name: hit.data['item name'] ?? 'N/A',
       restaurant: hit.data['restaurant'] ?? 'N/A',
@@ -41,6 +48,17 @@ class _SearchFeedScreenState extends State<SearchFeedScreen> {
       protein: hit.data['protein'] ?? 0,
     ))
         .toList();
+
+    // Using a set to avoid duplicates, considering unique identifier as name and restaurant
+    Set<Map<String, dynamic>> mealsSet = Set();
+    List<Meal> filteredMeals = [];
+
+    for (Meal meal in newMeals) {
+      var key = {'name': meal.name, 'restaurant': meal.restaurant};
+      if (mealsSet.add(key)) {
+        filteredMeals.add(meal);
+      }
+    }
 
     // Filter meals by both menu items and restaurants
     filteredMeals = filteredMeals.where((meal) =>
