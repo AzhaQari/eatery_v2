@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eatery/main.dart';
+import 'package:eatery/theme.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({Key? key}) : super(key: key);
@@ -13,6 +14,7 @@ class SignupPage extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: darkTheme,
       home: Scaffold(
         body: SingleChildScrollView(
           child: Container(

@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eatery/theme.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  String errorMessage = ''; // Initialize error message variable
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: darkTheme,
       home: Scaffold(
         body: Container(
           margin: const EdgeInsets.all(24),
@@ -38,9 +49,6 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _inputField(context) {
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -84,10 +92,10 @@ class LoginPage extends StatelessWidget {
               // If successful, navigate to home screen
               Navigator.pushReplacementNamed(context, '/home');
             } catch (e) {
-              // If sign in fails, show error message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Failed to sign in: $e")),
-              );
+              // If sign in fails, update error message and redraw UI
+              setState(() {
+                errorMessage = 'Failed to sign in: $e';
+              });
             }
           },
           style: ElevatedButton.styleFrom(
@@ -99,7 +107,13 @@ class LoginPage extends StatelessWidget {
             "Login",
             style: TextStyle(fontSize: 20),
           ),
-        )
+        ),
+        // Display error message if there is one
+        if (errorMessage.isNotEmpty)
+          Text(
+            errorMessage,
+            style: const TextStyle(color: Colors.red),
+          ),
       ],
     );
   }
