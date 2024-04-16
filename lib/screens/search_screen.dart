@@ -4,6 +4,7 @@ import 'package:algolia/algolia.dart'; // Import Algolia library
 import 'package:eatery/meal_model.dart';
 import 'package:eatery/widgets/meal_card.dart';
 import 'package:eatery/widgets/bottom_app_bar.dart';
+import 'search_feed_screen.dart'; // Import the search feed screen
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -34,11 +35,11 @@ class _SearchScreenState extends State<SearchScreen>
     setState(() {
       _meals = snapshot.hits
           .map((hit) => Meal(
-                name: hit.data['item name'] ?? 'N/A',
-                restaurant: hit.data['restaurant'] ?? 'N/A',
-                calories: hit.data['calories'] ?? 0,
-                protein: hit.data['protein'] ?? 0,
-              ))
+        name: hit.data['item name'] ?? 'N/A',
+        restaurant: hit.data['restaurant'] ?? 'N/A',
+        calories: hit.data['calories'] ?? 0,
+        protein: hit.data['protein'] ?? 0,
+      ))
           .toList();
     });
   }
@@ -47,7 +48,21 @@ class _SearchScreenState extends State<SearchScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search'),
+        title: Text(
+          'Search Food',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SearchFeedScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -98,5 +113,24 @@ class _SearchScreenState extends State<SearchScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+}
+
+class InitialScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SearchScreen()),
+            );
+          },
+          child: Text('Open Search'),
+        ),
+      ),
+    );
   }
 }

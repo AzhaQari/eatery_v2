@@ -17,6 +17,8 @@ const List<Color> menuItemColors = [
 final Color lightColor = Color(0xFFC0C0C0);
 final Color darkColor = Color(0xFF1E1E1E);
 
+final Color hintText = Color(0x3A3939);
+
 // Define your light theme data
 final ThemeData lightTheme = ThemeData(
   primaryColor: Colors.blue, // Example primary color for light theme
