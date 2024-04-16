@@ -1,17 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eatery/main.dart';
 import 'package:eatery/theme.dart';
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   const SignupPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-    TextEditingController confirmPasswordController = TextEditingController();
+  _SignupPageState createState() => _SignupPageState();
+}
 
+class _SignupPageState extends State<SignupPage> {
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+
+  String errorMessage = '';
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: darkTheme,
@@ -47,15 +57,45 @@ class SignupPage extends StatelessWidget {
                 Column(
                   children: <Widget>[
                     TextField(
+                      controller: firstNameController,
+                      decoration: InputDecoration(
+                        hintText: "First Name",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                        fillColor: Colors.purple.withOpacity(0.1),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: lastNameController,
+                      decoration: InputDecoration(
+                        hintText: "Last Name",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                        fillColor: Colors.purple.withOpacity(0.1),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
                       controller: emailController,
                       decoration: InputDecoration(
-                          hintText: "Email",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(18),
-                              borderSide: BorderSide.none),
-                          fillColor: Colors.purple.withOpacity(0.1),
-                          filled: true,
-                          prefixIcon: const Icon(Icons.email)),
+                        hintText: "Email",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                        fillColor: Colors.purple.withOpacity(0.1),
+                        filled: true,
+                        prefixIcon: const Icon(Icons.email),
+                      ),
                     ),
                     const SizedBox(height: 20),
                     TextField(
@@ -63,8 +103,9 @@ class SignupPage extends StatelessWidget {
                       decoration: InputDecoration(
                         hintText: "Password",
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none),
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
                         fillColor: Colors.purple.withOpacity(0.1),
                         filled: true,
                         prefixIcon: const Icon(Icons.password),
@@ -77,14 +118,23 @@ class SignupPage extends StatelessWidget {
                       decoration: InputDecoration(
                         hintText: "Confirm Password",
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide.none),
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
                         fillColor: Colors.purple.withOpacity(0.1),
                         filled: true,
                         prefixIcon: const Icon(Icons.password),
                       ),
                       obscureText: true,
                     ),
+                    if (errorMessage.isNotEmpty) // Show error message if it's not empty
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          errorMessage,
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
                   ],
                 ),
                 Container(
@@ -93,19 +143,40 @@ class SignupPage extends StatelessWidget {
                     onPressed: () async {
                       try {
                         if (passwordController.text == confirmPasswordController.text) {
+                          // Create user with email and password
                           UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                             email: emailController.text,
                             password: passwordController.text,
                           );
+                          // Add user data to Firestore
+                          await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+                            'firstName': firstNameController.text,
+                            'lastName': lastNameController.text,
+                            'email': emailController.text,
+                            'gender': '', // Add the gender field
+                            'dateOfBirth': null, // Add the date of birth field
+                            'height': null, // Add the height field
+                            'currentWeight': null, // Add the current weight field
+                            'goalWeight': null, // Add the goal weight field
+                            'activityLevel': '', // Add the activity level field
+                            'fitnessGoal': '', // Add the fitness goal field
+                            'budgetPerMeal': null, // Add the budget per meal field
+                            'budgetPerMonth': null, // Add the budget per month field
+                            'totalSpent': null, // Add the total spent field
+                            'trackedMeals': [], // Initialize the tracked meals array
+                          });
                           // User creation successful, navigate to login screen
                           Navigator.pushReplacementNamed(context, '/login');
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Passwords do not match")),
-                          );
+                          setState(() {
+                            errorMessage = "Passwords do not match";
+                          });
                         }
                       } catch (e) {
                         print('Failed to create user: $e');
+                        setState(() {
+                          errorMessage = "Failed to create user: $e";
+                        });
                       }
                     },
                     child: const Text(
