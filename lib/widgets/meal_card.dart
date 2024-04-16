@@ -7,27 +7,30 @@ class MealCard extends StatelessWidget {
   final Meal meal; // The current meal
   final List<Meal> meals; // The entire list of meals
   final int index; // Index of the current meal in the list
+  final Function(Meal) onTrack; // Function to handle tracking
 
   const MealCard({
     Key? key,
     required this.meal,
     required this.meals,
     required this.index,
+    required this.onTrack, // Added this line
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final int colorIndex =
-        meal.name.length % menuItemColors.length; // Example calculation
-    final Color cardColor =
-        menuItemColors[colorIndex]; // Access the color from your theme
+    final int colorIndex = meal.name.length % menuItemColors.length;
+    final Color cardColor = menuItemColors[colorIndex];
 
     return GestureDetector(
       onTap: () {
-        // Navigate to MealDetailPage with meals and index
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => MealDetailPage(meals: meals, initialIndex: index),
+            builder: (_) => MealDetailPage(
+              meals: meals,
+              initialIndex: index,
+              onTrack: onTrack, // Pass the onTrack function to the detail page
+            ),
           ),
         );
       },
@@ -37,7 +40,7 @@ class MealCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(15.0),
         ),
         elevation: 3,
-        color: cardColor, // Use the dynamically determined color
+        color: cardColor,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(

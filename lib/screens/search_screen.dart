@@ -43,6 +43,11 @@ class _SearchScreenState extends State<SearchScreen>
     });
   }
 
+  void _trackMeal(Meal meal) {
+    // Here, handle the logic to track a meal. For now, let's just print it.
+    print('Tracking meal: ${meal.name}');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,6 +81,7 @@ class _SearchScreenState extends State<SearchScreen>
                         meal: _meals[index],
                         meals: _meals,
                         index: index,
+                        onTrack: _trackMeal, // Pass the tracking function
                       );
                     },
                   ),
