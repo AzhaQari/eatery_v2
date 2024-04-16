@@ -32,9 +32,9 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   algolia: ^1.1.2
-  firebase_core: ^2.27.1
-  firebase_auth: ^4.17.9
-  cloud_firestore: ^4.15.9
+  firebase_core: ^2.29.0
+  firebase_auth: ^4.19.1
+  cloud_firestore: ^4.16.1
 
 
 dev_dependencies:

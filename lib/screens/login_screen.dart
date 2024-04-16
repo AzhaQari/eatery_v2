@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,40 +25,47 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  _header(context) {
-    return const Column(
-      children: [
+  Widget _header(context) {
+    return Column(
+      children: const [
         Text(
           "Welcome Back!",
           style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
         ),
-        Text("Enter your credential to login"),
+        Text("Enter your credentials to login"),
       ],
     );
   }
 
-  _inputField(context) {
+  Widget _inputField(context) {
+    TextEditingController emailController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
+          controller: emailController,
           decoration: InputDecoration(
-              hintText: "Username",
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none
-              ),
-              fillColor: Colors.purple.withOpacity(0.1),
-              filled: true,
-              prefixIcon: const Icon(Icons.person)),
+            hintText: "Email",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            fillColor: Colors.purple.withOpacity(0.1),
+            filled: true,
+            prefixIcon: const Icon(Icons.email),
+          ),
         ),
         const SizedBox(height: 10),
         TextField(
+          controller: passwordController,
           decoration: InputDecoration(
             hintText: "Password",
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none),
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
             fillColor: Colors.purple.withOpacity(0.1),
             filled: true,
             prefixIcon: const Icon(Icons.password),
@@ -66,8 +74,21 @@ class LoginPage extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         ElevatedButton(
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, '/home');
+          onPressed: () async {
+            try {
+              // Sign in user with email and password
+              await FirebaseAuth.instance.signInWithEmailAndPassword(
+                email: emailController.text,
+                password: passwordController.text,
+              );
+              // If successful, navigate to home screen
+              Navigator.pushReplacementNamed(context, '/home');
+            } catch (e) {
+              // If sign in fails, show error message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Failed to sign in: $e")),
+              );
+            }
           },
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
@@ -83,26 +104,31 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  _forgotPassword(context) {
+  Widget _forgotPassword(context) {
     return TextButton(
       onPressed: () {
+        // Implement your forgot password functionality here
       },
-      child: const Text("Forgot password?",
+      child: const Text(
+        "Forgot password?",
         style: TextStyle(color: Colors.purple),
       ),
     );
   }
 
-  _signup(context) {
+  Widget _signup(context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("Dont have an account? "),
+        const Text("Don't have an account? "),
         TextButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/signup');
-            },
-            child: const Text("Sign Up", style: TextStyle(color: Colors.purple),)
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/signup');
+          },
+          child: const Text(
+            "Sign Up",
+            style: TextStyle(color: Colors.purple),
+          ),
         )
       ],
     );

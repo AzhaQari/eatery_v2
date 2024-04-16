@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eatery/main.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({Key? key}) : super(key: key);
@@ -8,6 +9,7 @@ class SignupPage extends StatelessWidget {
   Widget build(BuildContext context) {
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
+    TextEditingController confirmPasswordController = TextEditingController();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -69,6 +71,7 @@ class SignupPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     TextField(
+                      controller: confirmPasswordController,
                       decoration: InputDecoration(
                         hintText: "Confirm Password",
                         border: OutlineInputBorder(
@@ -87,14 +90,19 @@ class SignupPage extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () async {
                       try {
-                        // Create user with email and password
-                        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                          email: emailController.text,
-                          password: passwordController.text,
-                        );
-                        // User creation successful, navigate to next screen or perform other actions
+                        if (passwordController.text == confirmPasswordController.text) {
+                          UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                            email: emailController.text,
+                            password: passwordController.text,
+                          );
+                          // User creation successful, navigate to login screen
+                          Navigator.pushReplacementNamed(context, '/login');
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Passwords do not match")),
+                          );
+                        }
                       } catch (e) {
-                        // User creation failed, show error message or handle the error
                         print('Failed to create user: $e');
                       }
                     },
