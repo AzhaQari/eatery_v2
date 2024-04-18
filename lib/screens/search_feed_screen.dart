@@ -1,4 +1,3 @@
-import 'package:eatery/main.dart';
 import 'package:flutter/material.dart';
 import 'package:algolia/algolia.dart'; // Import Algolia library
 import 'package:eatery/meal_model.dart';
@@ -12,6 +11,10 @@ class SearchFeedScreen extends StatefulWidget {
 class _SearchFeedScreenState extends State<SearchFeedScreen> {
   late TextEditingController _searchController;
   List<Meal> _filteredMeals = []; // List to hold filtered meals
+  final Algolia algolia = Algolia.init(
+    applicationId: '9EHWYVNJY9',
+    apiKey: 'e1baf96f6dce70195bbe680d1ac8047e',
+  );
 
   @override
   void initState() {
@@ -33,23 +36,15 @@ class _SearchFeedScreenState extends State<SearchFeedScreen> {
       return;
     }
 
-    AlgoliaQuery searchQuery = algolia.instance
+    AlgoliaQuery searchQuery = algolia
         .index('allmenuNutrition')
         .query(query)
         .setHitsPerPage(100); // Adjust the hits per page as needed
     AlgoliaQuerySnapshot snapshot = await searchQuery.getObjects();
 
-    // Convert Algolia hits to Meal objects
-    List<Meal> newMeals = snapshot.hits
-        .map((hit) => Meal(
-      name: hit.data['item name'] ?? 'N/A',
-      restaurant: hit.data['restaurant'] ?? 'N/A',
-      calories: hit.data['calories'] ?? 0,
-      protein: hit.data['protein'] ?? 0,
-    ))
-        .toList();
+    List<Meal> newMeals =
+        snapshot.hits.map((hit) => Meal.fromMap(hit.data)).toList();
 
-    // Using a set to avoid duplicates, considering unique identifier as name and restaurant
     Set<Map<String, dynamic>> mealsSet = Set();
     List<Meal> filteredMeals = [];
 
@@ -60,12 +55,12 @@ class _SearchFeedScreenState extends State<SearchFeedScreen> {
       }
     }
 
-    // Filter meals by both menu items and restaurants
-    filteredMeals = filteredMeals.where((meal) =>
-    meal.restaurant.toLowerCase().contains(query.toLowerCase()) ||
-        meal.name.toLowerCase().contains(query.toLowerCase())).toList();
+    filteredMeals = filteredMeals
+        .where((meal) =>
+            meal.restaurant.toLowerCase().contains(query.toLowerCase()) ||
+            meal.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
 
-    // Sort meals by protein values in descending order
     filteredMeals.sort((a, b) => b.protein.compareTo(a.protein));
 
     setState(() {
@@ -91,7 +86,8 @@ class _SearchFeedScreenState extends State<SearchFeedScreen> {
         itemBuilder: (context, index) {
           return MealCard(
             meal: _filteredMeals[index],
-            meals: _filteredMeals,
+            meals:
+                _filteredMeals, // Ensure the list is passed correctly for navigation
             index: index,
           );
         },
