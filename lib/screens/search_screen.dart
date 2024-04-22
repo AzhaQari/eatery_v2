@@ -17,6 +17,10 @@ class _SearchScreenState extends State<SearchScreen>
   List<Meal> _meals = []; // Now stores Meal objects
   int _currentPage = 0;
   int _itemsPerPage = 100;
+  final Algolia algolia = Algolia.init(
+    applicationId: '9EHWYVNJY9',
+    apiKey: 'e1baf96f6dce70195bbe680d1ac8047e',
+  );
 
   @override
   void initState() {
@@ -26,7 +30,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Future<void> _fetchMenuItems() async {
-    AlgoliaQuery query = algolia.instance
+    AlgoliaQuery query = algolia
         .index('allmenuNutrition')
         .query('')
         .setHitsPerPage(_itemsPerPage)
@@ -34,12 +38,7 @@ class _SearchScreenState extends State<SearchScreen>
     AlgoliaQuerySnapshot snapshot = await query.getObjects();
     setState(() {
       _meals = snapshot.hits
-          .map((hit) => Meal(
-        name: hit.data['item name'] ?? 'N/A',
-        restaurant: hit.data['restaurant'] ?? 'N/A',
-        calories: hit.data['calories'] ?? 0,
-        protein: hit.data['protein'] ?? 0,
-      ))
+          .map((hit) => Meal.fromMap(hit.data as Map<String, dynamic>))
           .toList();
     });
   }
@@ -48,18 +47,13 @@ class _SearchScreenState extends State<SearchScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Search Food',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: Text('Search Food'),
         actions: [
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SearchFeedScreen()),
-              );
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SearchFeedScreen()));
             },
           ),
         ],
@@ -123,10 +117,8 @@ class InitialScreen extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SearchScreen()),
-            );
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SearchScreen()));
           },
           child: Text('Open Search'),
         ),

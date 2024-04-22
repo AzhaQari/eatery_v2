@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:eatery/theme.dart'; // Confirm this path matches where menuItemColors is defined
 import 'package:eatery/meal_model.dart'; // Confirm this path is correct
+import 'package:firebase_auth/firebase_auth.dart'; // Add this import for FirebaseAuth
 
 class MealDetailPage extends StatefulWidget {
   final List<Meal> meals;
@@ -77,7 +79,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
                     children: [
                       Expanded(
                           child:
-                              NutritionalInfoBox(label: 'Price', value: '\$X')),
+                              NutritionalInfoBox(label: 'Price', value: '0')),
                       SizedBox(width: 8), // Spacing between boxes
                       Expanded(
                           child: NutritionalInfoBox(
@@ -87,7 +89,9 @@ class _MealDetailPageState extends State<MealDetailPage> {
                           child: NutritionalInfoBox(
                               label: 'Protein', value: '${meal.protein}g')),
                       SizedBox(width: 8), // Spacing between boxes
-                      Expanded(child: TrackButton()),
+                      Expanded(
+                          child:
+                              TrackButton(meal: meal)), // Pass the meal object
                     ],
                   ),
                 ),
@@ -105,10 +109,8 @@ class NutritionalInfoBox extends StatelessWidget {
   final String label;
   final String value;
 
-  const NutritionalInfoBox({
-    required this.label,
-    required this.value,
-  });
+  NutritionalInfoBox({Key? key, required this.label, required this.value})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +141,10 @@ class NutritionalInfoBox extends StatelessWidget {
 }
 
 class TrackButton extends StatefulWidget {
+  final Meal meal;
+
+  TrackButton({Key? key, required this.meal}) : super(key: key);
+
   @override
   _TrackButtonState createState() => _TrackButtonState();
 }
@@ -146,14 +152,60 @@ class TrackButton extends StatefulWidget {
 class _TrackButtonState extends State<TrackButton> {
   bool _isTracked = false; // Initial state of tracking
 
+  Future<void> _trackMeal() async {
+    // Ensure we have a user id, otherwise, abort the tracking
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Not logged in')));
+      return;
+    }
+
+    if (!_isTracked) {
+      // Create a map of the meal's details
+      Map<String, dynamic> mealData = {
+        'dateTracked': DateTime.now(),
+        'restaurant': widget.meal.restaurant,
+        'item name': widget.meal.name,
+        'protein': widget.meal.protein,
+        'calories': widget.meal.calories,
+        'price': 0, // Assuming price is a field in Meal
+      };
+
+      // Reference to the user's document in Firestore
+      DocumentReference userDoc =
+          FirebaseFirestore.instance.collection('users').doc(userId);
+
+      // Update the user's document with the new meal in the trackedMeals array
+      userDoc.update({
+        'trackedMeals': FieldValue.arrayUnion([mealData])
+      }).then((_) {
+        setState(() {
+          _isTracked = true; // Update the tracked state
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Meal tracked!')));
+
+        // Set the state back to untracked after 3 seconds
+        Future.delayed(Duration(seconds: 3), () {
+          setState(() {
+            _isTracked = false;
+          });
+        });
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to track meal: $error')));
+      });
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Meal already tracked')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        setState(() {
-          _isTracked = !_isTracked; // Toggle the tracked state
-        });
-      },
+      onTap: _trackMeal,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
@@ -164,18 +216,13 @@ class _TrackButtonState extends State<TrackButton> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _isTracked
-                  ? Icons.check_circle
-                  : Icons
-                      .add_circle_outline, // Conditional icon based on tracking state
-              color: _isTracked
-                  ? Colors.lightGreen
-                  : Colors.white, // Conditional color based on tracking state
+              _isTracked ? Icons.check_circle : Icons.add_circle_outline,
+              color: _isTracked ? Colors.lightGreen : Colors.white,
               size: 24,
             ),
             SizedBox(height: 4),
             Text(
-              'Track',
+              _isTracked ? 'Tracked' : 'Track',
               style: TextStyle(fontSize: 16, color: Colors.white60),
             ),
           ],
