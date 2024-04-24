@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:eatery/widgets/bottom_app_bar.dart';
 import 'package:eatery/widgets/vertical_card.dart';
 import 'package:eatery/widgets/menu_playlist.dart';
+import 'package:eatery/widgets/eatpass_widget.dart'; // Ensure this file exists and is located correctly
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -13,7 +14,7 @@ class HomeScreen extends StatelessWidget {
       Colors.deepOrange,
       Colors.purple,
       Colors.teal
-    ]; // New list of colors for MenuPlaylist
+    ];
 
     final double cardWidth = (MediaQuery.of(context).size.width - 32 - 12) / 3;
 
@@ -35,32 +36,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Card(
-              elevation: 4,
-              margin: EdgeInsets.symmetric(horizontal: 16.0),
-              child: InkWell(
-                onTap: () {
-                  // Handle Eat Pass button tap
-                },
-                child: Container(
-                  width: MediaQuery.of(context).size.width - 32 - 12,
-                  height: 160.0,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.blue,
-                  ),
-                  child: Text(
-                    'Eat Pass',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22.0,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            EatPassWidget(), // Custom Eat Pass widget
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 4.0, 0.0, 4.0),
               child: Text(
@@ -112,7 +88,7 @@ class HomeScreen extends StatelessWidget {
                 (index) => MenuPlaylist(
                   title: 'Menu ${index + 1}',
                   onPressed: () {},
-                  color: menuColors[index], // Set color for MenuPlaylist
+                  color: menuColors[index],
                   height: 200.0,
                 ),
               ),
