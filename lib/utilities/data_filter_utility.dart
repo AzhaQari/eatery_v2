@@ -15,9 +15,13 @@ class DataFilterUtility {
         .toList();
   }
 
-  static Future<int> computeAllTimeProtein(String userId) async {
+  static Future<void> updateAllTimeProtein(String userId) async {
     List<Meal> meals = await fetchMeals(userId);
-    return meals.fold<int>(0, (int total, Meal meal) => total + meal.protein);
+    int totalProtein = meals.fold<int>(0, (sum, meal) => sum + meal.protein);
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .update({'allTimeProtein': totalProtein});
   }
 
   static Future<int> computeTodayProtein(String userId) async {

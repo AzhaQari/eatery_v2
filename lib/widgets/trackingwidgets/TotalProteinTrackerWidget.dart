@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:eatery/utilities/data_filter_utility.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AllTimeProteinWidget extends StatefulWidget {
   final String userId;
@@ -20,10 +20,18 @@ class _AllTimeProteinWidgetState extends State<AllTimeProteinWidget> {
     _loadData();
   }
 
-  void _loadData() async {
-    int protein = await DataFilterUtility.computeAllTimeProtein(widget.userId);
-    setState(() {
-      _totalProtein = protein;
+  void _loadData() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists && mounted) {
+        // Ensure the widget is still mounted when updating the state
+        setState(() {
+          _totalProtein = snapshot.data()?['allTimeProtein'] ?? 0;
+        });
+      }
     });
   }
 

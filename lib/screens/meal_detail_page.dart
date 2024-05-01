@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:eatery/theme.dart'; // Confirm this path matches where menuItemColors is defined
 import 'package:eatery/meal_model.dart'; // Confirm this path is correct
 import 'package:firebase_auth/firebase_auth.dart'; // Add this import for FirebaseAuth
+import 'package:eatery/utilities/data_filter_utility.dart'; // Ensure this import is correct
 
 class MealDetailPage extends StatefulWidget {
   final List<Meal> meals;
@@ -169,16 +170,32 @@ class _TrackButtonState extends State<TrackButton> {
         'item name': widget.meal.name,
         'protein': widget.meal.protein,
         'calories': widget.meal.calories,
-        'price': 0, // Assuming price is a field in Meal
+        'price': widget.meal.price, // Update this if price handling changes
       };
 
       // Reference to the user's document in Firestore
       DocumentReference userDoc =
           FirebaseFirestore.instance.collection('users').doc(userId);
 
-      // Update the user's document with the new meal in the trackedMeals array
-      userDoc.update({
-        'trackedMeals': FieldValue.arrayUnion([mealData])
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        // Get the user's current document to calculate the new protein total
+        DocumentSnapshot snapshot = await transaction.get(userDoc);
+        if (!snapshot.exists) {
+          throw Exception("User does not exist!");
+        }
+        Map<String, dynamic> userData =
+            snapshot.data() as Map<String, dynamic>; // Proper casting
+        int currentProtein =
+            userData['allTimeProtein'] ?? 0; // Use of the casted data
+
+        // Update the total protein with the protein from the new meal
+        int updatedProtein = currentProtein + widget.meal.protein;
+
+        // Perform the updates within a transaction
+        transaction.update(userDoc, {
+          'allTimeProtein': updatedProtein,
+          'trackedMeals': FieldValue.arrayUnion([mealData]),
+        });
       }).then((_) {
         setState(() {
           _isTracked = true; // Update the tracked state
