@@ -153,8 +153,13 @@ class TrackButton extends StatefulWidget {
 class _TrackButtonState extends State<TrackButton> {
   bool _isTracked = false; // Initial state of tracking
 
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
   Future<void> _trackMeal() async {
-    // Ensure we have a user id, otherwise, abort the tracking
     String? userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
       ScaffoldMessenger.of(context)
@@ -163,47 +168,47 @@ class _TrackButtonState extends State<TrackButton> {
     }
 
     if (!_isTracked) {
-      // Create a map of the meal's details
       Map<String, dynamic> mealData = {
         'dateTracked': DateTime.now(),
         'restaurant': widget.meal.restaurant,
         'item name': widget.meal.name,
         'protein': widget.meal.protein,
         'calories': widget.meal.calories,
-        'price': widget.meal.price, // Update this if price handling changes
+        'price': widget.meal.price,
       };
 
-      // Reference to the user's document in Firestore
       DocumentReference userDoc =
           FirebaseFirestore.instance.collection('users').doc(userId);
 
       FirebaseFirestore.instance.runTransaction((transaction) async {
-        // Get the user's current document to calculate the new protein total
         DocumentSnapshot snapshot = await transaction.get(userDoc);
         if (!snapshot.exists) {
           throw Exception("User does not exist!");
         }
-        Map<String, dynamic> userData =
-            snapshot.data() as Map<String, dynamic>; // Proper casting
-        int currentProtein =
-            userData['allTimeProtein'] ?? 0; // Use of the casted data
+        Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
+        int currentProtein = userData['todayProtein'] ?? 0;
+        DateTime lastUpdate =
+            (userData['lastProteinUpdate'] as Timestamp?)?.toDate() ??
+                DateTime.now();
 
-        // Update the total protein with the protein from the new meal
         int updatedProtein = currentProtein + widget.meal.protein;
+        if (!isSameDay(DateTime.now(), lastUpdate)) {
+          updatedProtein = widget.meal.protein;
+        }
 
-        // Perform the updates within a transaction
         transaction.update(userDoc, {
-          'allTimeProtein': updatedProtein,
+          'todayProtein': updatedProtein,
+          'lastProteinUpdate': FieldValue
+              .serverTimestamp(), // Use server timestamp for consistency
           'trackedMeals': FieldValue.arrayUnion([mealData]),
         });
       }).then((_) {
         setState(() {
-          _isTracked = true; // Update the tracked state
+          _isTracked = true;
         });
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Meal tracked!')));
 
-        // Set the state back to untracked after 3 seconds
         Future.delayed(Duration(seconds: 3), () {
           setState(() {
             _isTracked = false;

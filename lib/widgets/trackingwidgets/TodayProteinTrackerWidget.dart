@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatery/utilities/data_filter_utility.dart';
+import 'package:eatery/meal_model.dart';
 
 class TodaysProteinWidget extends StatefulWidget {
   final String userId;
@@ -12,6 +15,7 @@ class TodaysProteinWidget extends StatefulWidget {
 
 class _TodaysProteinWidgetState extends State<TodaysProteinWidget> {
   int _todayProtein = 0;
+  StreamSubscription? _subscription; // Variable to store the subscription
 
   @override
   void initState() {
@@ -19,11 +23,24 @@ class _TodaysProteinWidgetState extends State<TodaysProteinWidget> {
     _loadData();
   }
 
-  void _loadData() async {
-    int protein = await DataFilterUtility.computeTodayProtein(widget.userId);
-    setState(() {
-      _todayProtein = protein;
+  void _loadData() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists && mounted) {
+        setState(() {
+          _todayProtein = snapshot.data()?['todayProtein'] ?? 0;
+        });
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel(); // Cancel the subscription
+    super.dispose();
   }
 
   @override
