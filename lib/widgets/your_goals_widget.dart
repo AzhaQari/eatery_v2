@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatery/utilities/data_filter_utility.dart';
-
-// Make sure these paths match the actual file locations
-import 'package:eatery/widgets/trackingwidgets/TotalProteinTrackerWidget.dart';
-import 'package:eatery/widgets/trackingwidgets/TodayProteinTrackerWidget.dart';
+import 'package:eatery/widgets/trackingwidgets/TotalProteinTrackerWidget.dart'; // Ensure this path is correct
+import 'package:eatery/widgets/trackingwidgets/TodayProteinTrackerWidget.dart'; // Ensure this path is correct
+import 'package:eatery/widgets/trackingwidgets/TodayCalorieTrackerWidget.dart'; // Ensure this path is correct
 
 class YourGoalsWidget extends StatelessWidget {
   @override
@@ -25,22 +24,22 @@ class YourGoalsWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Widgets are now placed side by side using a Row.
+            // First row with protein trackers
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(
-                  // Instantiate AllTimeProteinWidget with userId
                   child: AllTimeProteinWidget(userId: userId),
                 ),
-                SizedBox(width: 16), // This adds space between the two widgets
+                SizedBox(width: 10), // This adds space between the two widgets
                 Expanded(
-                  // Instantiate TodaysProteinWidget with userId
                   child: TodaysProteinWidget(userId: userId),
                 ),
               ],
             ),
-            // Additional widgets for calories and budget tracking can be added here.
+            SizedBox(height: 15), // Space between rows
+            // Second row with calorie tracker
+            TodaysCaloriesWidget(userId: userId),
           ],
         ),
       ),
