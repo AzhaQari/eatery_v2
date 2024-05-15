@@ -187,6 +187,7 @@ class _TrackButtonState extends State<TrackButton> {
         }
         Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
         int currentProtein = userData['todayProtein'] ?? 0;
+        int allTimeProtein = userData['allTimeProtein'] ?? 0;
         DateTime lastUpdate =
             (userData['lastProteinUpdate'] as Timestamp?)?.toDate() ??
                 DateTime.now();
@@ -198,6 +199,8 @@ class _TrackButtonState extends State<TrackButton> {
 
         transaction.update(userDoc, {
           'todayProtein': updatedProtein,
+          'allTimeProtein':
+              allTimeProtein + widget.meal.protein, // Update allTimeProtein
           'lastProteinUpdate': FieldValue
               .serverTimestamp(), // Use server timestamp for consistency
           'trackedMeals': FieldValue.arrayUnion([mealData]),
