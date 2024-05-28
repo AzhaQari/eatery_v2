@@ -27,7 +27,6 @@ class _AllTimeProteinWidgetState extends State<AllTimeProteinWidget> {
         .snapshots()
         .listen((snapshot) {
       if (snapshot.exists && mounted) {
-        // Ensure the widget is still mounted when updating the state
         setState(() {
           _totalProtein = snapshot.data()?['allTimeProtein'] ?? 0;
         });
@@ -37,27 +36,8 @@ class _AllTimeProteinWidgetState extends State<AllTimeProteinWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Text('All Time Protein',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-          SizedBox(height: 8),
-          Text('$_totalProtein g',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-        ],
-      ),
-    );
+    return Text('$_totalProtein g',
+        style: TextStyle(
+            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white));
   }
 }

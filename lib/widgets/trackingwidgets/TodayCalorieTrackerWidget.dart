@@ -40,27 +40,10 @@ class _TodaysCaloriesWidgetState extends State<TodaysCaloriesWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue, // different color for differentiation
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Text('Today\'s Calories',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-          SizedBox(height: 8),
-          Text('$_todayCalories cal',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-        ],
-      ),
+    return Text(
+      '$_todayCalories cal',
+      style: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
     );
   }
 }
