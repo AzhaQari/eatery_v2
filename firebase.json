@@ -1,1 +1,42 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"eatery-c9660","appId":"1:538083653908:android:d361e7aae18bd3c501aa01","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"eatery-c9660","configurations":{"android":"1:538083653908:android:d361e7aae18bd3c501aa01","ios":"1:538083653908:ios:04b4008eda827da101aa01","macos":"1:538083653908:ios:04b4008eda827da101aa01","web":"1:538083653908:web:6ff357399d717aab01aa01","windows":"1:538083653908:web:a6fb2bedf6b4abcd01aa01"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "eatery-c9660",
+          "appId": "1:538083653908:android:d361e7aae18bd3c501aa01",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "eatery-c9660",
+          "configurations": {
+            "android": "1:538083653908:android:d361e7aae18bd3c501aa01",
+            "ios": "1:538083653908:ios:04b4008eda827da101aa01",
+            "macos": "1:538083653908:ios:04b4008eda827da101aa01",
+            "web": "1:538083653908:web:6ff357399d717aab01aa01",
+            "windows": "1:538083653908:web:a6fb2bedf6b4abcd01aa01"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}

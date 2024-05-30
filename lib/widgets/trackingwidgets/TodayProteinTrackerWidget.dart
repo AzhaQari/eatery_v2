@@ -15,7 +15,7 @@ class TodaysProteinWidget extends StatefulWidget {
 
 class _TodaysProteinWidgetState extends State<TodaysProteinWidget> {
   int _todayProtein = 0;
-  StreamSubscription? _subscription; // Variable to store the subscription
+  StreamSubscription? _subscription;
 
   @override
   void initState() {
@@ -24,7 +24,7 @@ class _TodaysProteinWidgetState extends State<TodaysProteinWidget> {
   }
 
   void _loadData() {
-    FirebaseFirestore.instance
+    _subscription = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
         .snapshots()
@@ -39,33 +39,16 @@ class _TodaysProteinWidgetState extends State<TodaysProteinWidget> {
 
   @override
   void dispose() {
-    _subscription?.cancel(); // Cancel the subscription
+    _subscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.green,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Text('Today\'s Protein',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-          SizedBox(height: 8),
-          Text('$_todayProtein g',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
-        ],
-      ),
+    return Text(
+      '$_todayProtein g',
+      style: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
     );
   }
 }

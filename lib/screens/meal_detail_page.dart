@@ -180,47 +180,58 @@ class _TrackButtonState extends State<TrackButton> {
       DocumentReference userDoc =
           FirebaseFirestore.instance.collection('users').doc(userId);
 
-      FirebaseFirestore.instance.runTransaction((transaction) async {
-        DocumentSnapshot snapshot = await transaction.get(userDoc);
-        if (!snapshot.exists) {
-          throw Exception("User does not exist!");
-        }
-        Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
-        int currentProtein = userData['todayProtein'] ?? 0;
-        int allTimeProtein = userData['allTimeProtein'] ?? 0;
-        DateTime lastUpdate =
-            (userData['lastProteinUpdate'] as Timestamp?)?.toDate() ??
-                DateTime.now();
+      try {
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          DocumentSnapshot snapshot = await transaction.get(userDoc);
+          if (!snapshot.exists) {
+            throw Exception("User does not exist!");
+          }
+          Map<String, dynamic> userData =
+              snapshot.data() as Map<String, dynamic>;
+          DateTime lastUpdate =
+              (userData['lastProteinUpdate'] as Timestamp?)?.toDate() ??
+                  DateTime.now();
 
-        int updatedProtein = currentProtein + widget.meal.protein;
-        if (!isSameDay(DateTime.now(), lastUpdate)) {
-          updatedProtein = widget.meal.protein;
-        }
+          // Check if it's a new day
+          bool isNewDay = !isSameDay(DateTime.now(), lastUpdate);
+          int updatedProtein = isNewDay
+              ? widget.meal.protein
+              : (userData['todayProtein'] ?? 0) + widget.meal.protein;
+          int updatedCalories = isNewDay
+              ? widget.meal.calories
+              : (userData['todayCalories'] ?? 0) + widget.meal.calories;
 
-        transaction.update(userDoc, {
-          'todayProtein': updatedProtein,
-          'allTimeProtein':
-              allTimeProtein + widget.meal.protein, // Update allTimeProtein
-          'lastProteinUpdate': FieldValue
-              .serverTimestamp(), // Use server timestamp for consistency
-          'trackedMeals': FieldValue.arrayUnion([mealData]),
-        });
-      }).then((_) {
-        setState(() {
-          _isTracked = true;
-        });
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Meal tracked!')));
-
-        Future.delayed(Duration(seconds: 3), () {
-          setState(() {
-            _isTracked = false;
+          transaction.update(userDoc, {
+            'todayProtein': updatedProtein,
+            'allTimeProtein':
+                (userData['allTimeProtein'] ?? 0) + widget.meal.protein,
+            'todayCalories': updatedCalories,
+            'lastProteinUpdate': FieldValue.serverTimestamp(),
+            'trackedMeals': FieldValue.arrayUnion([mealData]),
           });
         });
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to track meal: $error')));
-      });
+
+        if (mounted) {
+          setState(() {
+            _isTracked = true;
+          });
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Meal tracked!')));
+
+          Future.delayed(Duration(seconds: 3), () {
+            if (mounted) {
+              setState(() {
+                _isTracked = false;
+              });
+            }
+          });
+        }
+      } catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to track meal: $error')));
+        }
+      }
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Meal already tracked')));
