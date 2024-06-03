@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:eatery/utilities/data_filter_utility.dart';
 import 'package:eatery/meal_model.dart';
 
@@ -15,31 +16,57 @@ class TodaysProteinWidget extends StatefulWidget {
 
 class _TodaysProteinWidgetState extends State<TodaysProteinWidget> {
   int _todayProtein = 0;
-  StreamSubscription? _subscription;
+  Timer? _timer;
+  StreamSubscription? _subscription; // Subscription to Firestore
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _subscribeToProteinUpdates();
+    _scheduleMidnightReset();
   }
 
-  void _loadData() {
+  void _subscribeToProteinUpdates() {
     _subscription = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
         .snapshots()
         .listen((snapshot) {
       if (snapshot.exists && mounted) {
-        setState(() {
+        DateTime lastUpdated = (snapshot.data()?['lastProteinUpdate'] as Timestamp?)?.toDate() ?? DateTime.now();
+        DateTime today = DateTime.now();
+        if (!isSameDay(lastUpdated, today)) {
+          _todayProtein = 0;
+        } else {
           _todayProtein = snapshot.data()?['todayProtein'] ?? 0;
-        });
+        }
+        setState(() {});
       }
     });
   }
 
+  void _scheduleMidnightReset() {
+    DateTime now = DateTime.now();
+    DateTime nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    Duration timeToMidnight = nextMidnight.difference(now);
+    _timer = Timer(timeToMidnight, () {
+      _loadData();  // Reload data to check and reset if necessary
+    });
+  }
+
+  void _loadData() async {
+    int proteinToday = await DataFilterUtility.computeTodayProtein(widget.userId);
+    if (mounted) {
+      setState(() {
+        _todayProtein = proteinToday;
+      });
+    }
+  }
+
   @override
   void dispose() {
-    _subscription?.cancel();
+    _timer?.cancel();
+    _subscription?.cancel();  // Make sure to cancel the subscription
     super.dispose();
   }
 
@@ -50,5 +77,11 @@ class _TodaysProteinWidgetState extends State<TodaysProteinWidget> {
       style: TextStyle(
           fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
     );
+  }
+
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 }

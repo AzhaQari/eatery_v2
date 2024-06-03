@@ -2,25 +2,33 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-exports.resetDailyTotals = functions.pubsub.schedule('0 0 * * *') // This runs at midnight every day
-    .timeZone('America/Los_Angeles') // Adjust timezone as needed
-    .onRun(async (context) => {
-        const usersRef = admin.firestore().collection('users');
-        const batch = admin.firestore().batch();
-
-        const snapshot = await usersRef.get();
+exports.resetDailyMetrics = functions.pubsub.schedule('0 0 * * *')
+  .timeZone('America/Los_Angeles') // Change this to your required timezone
+  .onRun((context) => {
+    return admin.firestore().collection('users').get()
+      .then(snapshot => {
+        const updates = {};
         snapshot.forEach(doc => {
-            batch.update(doc.ref, {
-                todayProtein: 0,
-                todayCalories: 0,
-                lastProteinUpdate: admin.firestore.FieldValue.serverTimestamp(),
-                lastCaloriesUpdate: admin.firestore.FieldValue.serverTimestamp()
-            });
+          updates[`${doc.id}/todayProtein`] = 0;
+          updates[`${doc.id}/todayCalories`] = 0;
         });
+        return admin.firestore().batchCommit(updates);
+      }).catch(error => console.log(error));
+  });
 
-        return batch.commit().then(() => {
-            console.log('Daily totals reset successfully.');
-        }).catch(error => {
-            console.error('Failed to reset daily totals:', error);
+exports.resetWeeklyMonthlyMetrics = functions.pubsub.schedule('every monday 00:00')
+  .timeZone('America/Los_Angeles') // Adjust for weekly reset
+  .onRun((context) => {
+    return admin.firestore().collection('users').get()
+      .then(snapshot => {
+        const updates = {};
+        snapshot.forEach(doc => {
+          updates[`${doc.id}/thisWeeksSpend`] = 0;
+          // Reset monthly on the first day of the month
+          if (new Date().getDate() === 1) {
+            updates[`${doc.id}/thisMonthsSpend`] = 0;
+          }
         });
-    });
+        return admin.firestore().batchCommit(updates);
+      }).catch(error => console.log(error));
+  });
