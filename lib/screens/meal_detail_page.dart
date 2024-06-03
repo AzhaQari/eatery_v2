@@ -29,6 +29,20 @@ class _MealDetailPageState extends State<MealDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.meals[widget.initialIndex].name),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: <Widget>[
+          // Padding added around the IconButton for proper alignment and spacing
+          Padding(
+            padding: EdgeInsets.only(right: 12.0), // Increase the right padding for better alignment
+            child: IconButton(
+              icon: Icon(Icons.more_horiz), // Changed to horizontal three dots icon
+              onPressed: () => showMenuOptions(context),
+            ),
+          ),
+        ],
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -104,7 +118,83 @@ class _MealDetailPageState extends State<MealDetailPage> {
       ),
     );
   }
+
+  void showMenuOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.playlist_add),
+              title: Text('Add to Menulist'),
+              onTap: () {
+                // Implement the functionality to add to menulist
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.playlist_add_check),
+              title: Text('Create Menulist'),
+              onTap: () {
+                // Implement the functionality to create a new menulist
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.share),
+              title: Text('Share'),
+              onTap: () {
+                // Implement the functionality to share
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
+
+  void showMenuOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.playlist_add),
+              title: Text('Add to Menulist'),
+              onTap: () {
+                // Implement the functionality to add to menulist
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.playlist_add_check),
+              title: Text('Create Menulist'),
+              onTap: () {
+                // Implement the functionality to create a new menulist
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.share),
+              title: Text('Share'),
+              onTap: () {
+                // Implement the functionality to share
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
 class NutritionalInfoBox extends StatelessWidget {
   final String label;
