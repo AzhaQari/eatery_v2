@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:eatery/screens/home_screen.dart';
-import 'package:eatery/screens/search_screen.dart';
-import 'package:eatery/screens/profile_screen.dart';
+import 'package:eatery/screens/Home/home_screen.dart';
+import 'package:eatery/screens/Discover/search_screen.dart';
+import 'package:eatery/screens/Profile/profile_screen.dart';
 
 class BottomAppBarWidget extends StatelessWidget {
   @override
