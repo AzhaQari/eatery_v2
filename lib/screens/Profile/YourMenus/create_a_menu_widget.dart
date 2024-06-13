@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eatery/meal_model.dart'; // Confirm the path is correct
 
 class CreateMenulistPage extends StatefulWidget {
+  final Meal mealToInclude; // Required parameter for including meal details
+
+  const CreateMenulistPage({Key? key, required this.mealToInclude}) : super(key: key);
+
   @override
   _CreateMenulistPageState createState() => _CreateMenulistPageState();
 }
@@ -12,19 +17,37 @@ class _CreateMenulistPageState extends State<CreateMenulistPage> {
   String _name = '';
   String _description = '';
 
-  // Function to create a new menulist
   Future<void> _createMenulist() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
-        await FirebaseFirestore.instance.collection('users').doc(userId).collection('menulists').add({
+        DocumentReference userDocRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+        Map<String, dynamic> mealData = {
+          'calories': widget.mealToInclude.calories,
+          'dateTracked': widget.mealToInclude.dateTracked,
+          'item name': widget.mealToInclude.name,
+          'price': widget.mealToInclude.price,
+          'protein': widget.mealToInclude.protein,
+          'restaurant': widget.mealToInclude.restaurant,
+        };
+
+        Map<String, dynamic> menulistData = {
           'name': _name,
           'description': _description,
-          'meals': [],
+          'meals': [mealData],
+        };
+
+        await userDocRef.update({
+          'menulists': FieldValue.arrayUnion([menulistData]),
         });
-        Navigator.pop(context); // Optionally close the screen after saving
+
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Menulist created successfully!')));
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fill all fields!')));
     }
   }
 
@@ -43,7 +66,7 @@ class _CreateMenulistPageState extends State<CreateMenulistPage> {
             children: <Widget>[
               TextFormField(
                 decoration: InputDecoration(labelText: 'Name'),
-                onSaved: (value) => _name = value!,
+                onSaved: (value) => _name = value ?? '',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a name';
@@ -53,7 +76,7 @@ class _CreateMenulistPageState extends State<CreateMenulistPage> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Description'),
-                onSaved: (value) => _description = value!,
+                onSaved: (value) => _description = value ?? '',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a description';

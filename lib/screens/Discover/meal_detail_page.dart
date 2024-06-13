@@ -130,7 +130,9 @@ class _MealDetailPageState extends State<MealDetailPage> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddToMenuWidget()),
+                  MaterialPageRoute(
+                    builder: (context) => AddToMenuWidget(currentMeal: widget.meals[widget.initialIndex])
+                  ),
                 );
               },
             ),
@@ -141,7 +143,9 @@ class _MealDetailPageState extends State<MealDetailPage> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CreateMenulistPage()),
+                  MaterialPageRoute(
+                    builder: (context) => CreateMenulistPage(mealToInclude: widget.meals[widget.initialIndex])
+                  ),
                 );
               },
             ),
@@ -206,12 +210,6 @@ class TrackButton extends StatefulWidget {
 
 class _TrackButtonState extends State<TrackButton> {
   bool _isTracked = false; // Initial state of tracking
-
-  bool isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
-  }
 
   Future<void> _trackMeal() async {
     String? userId = FirebaseAuth.instance.currentUser?.uid;
@@ -311,3 +309,12 @@ class _TrackButtonState extends State<TrackButton> {
     );
   }
 }
+
+bool isSameDay(DateTime date1, DateTime date2) {
+  return date1.year == date2.year &&
+      date1.month == date2.month &&
+      date1.day == date2.day;
+}
+
+
+
