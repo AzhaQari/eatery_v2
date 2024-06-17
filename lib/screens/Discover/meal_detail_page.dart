@@ -19,18 +19,28 @@ class MealDetailPage extends StatefulWidget {
 
 class _MealDetailPageState extends State<MealDetailPage> {
   late PageController _pageController;
+  late int _currentIndex;
 
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex; // Initialize _currentIndex here
     _pageController = PageController(initialPage: widget.initialIndex);
+    _pageController.addListener(() {
+      int newIndex = _pageController.page?.round() ?? _currentIndex;
+      if (newIndex != _currentIndex) {
+        setState(() {
+          _currentIndex = newIndex;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.meals[widget.initialIndex].name),
+        title: Text(widget.meals[_currentIndex].name),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -131,7 +141,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddToMenuWidget(currentMeal: widget.meals[widget.initialIndex])
+                    builder: (context) => AddToMenuWidget(currentMeal: widget.meals[_currentIndex])
                   ),
                 );
               },
@@ -144,7 +154,7 @@ class _MealDetailPageState extends State<MealDetailPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CreateMenulistPage(mealToInclude: widget.meals[widget.initialIndex])
+                    builder: (context) => CreateMenulistPage(mealToInclude: widget.meals[_currentIndex])
                   ),
                 );
               },
@@ -315,6 +325,3 @@ bool isSameDay(DateTime date1, DateTime date2) {
       date1.month == date2.month &&
       date1.day == date2.day;
 }
-
-
-

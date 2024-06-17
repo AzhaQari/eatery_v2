@@ -24,6 +24,9 @@ class _CreateMenulistPageState extends State<CreateMenulistPage> {
       if (userId != null) {
         DocumentReference userDocRef = FirebaseFirestore.instance.collection('users').doc(userId);
 
+        // Generate a unique ID for the menulist
+        String menulistId = FirebaseFirestore.instance.collection('dummy').doc().id;
+
         Map<String, dynamic> mealData = {
           'calories': widget.mealToInclude.calories,
           'dateTracked': widget.mealToInclude.dateTracked,
@@ -34,6 +37,7 @@ class _CreateMenulistPageState extends State<CreateMenulistPage> {
         };
 
         Map<String, dynamic> menulistData = {
+          'id': menulistId,
           'name': _name,
           'description': _description,
           'meals': [mealData],

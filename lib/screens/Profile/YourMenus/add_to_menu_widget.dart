@@ -24,73 +24,85 @@ class _AddToMenuWidgetState extends State<AddToMenuWidget> {
     fetchMenulists();
   }
 
-void fetchMenulists() async {
-  if (userId == null) {
-    print("User ID is null.");
-    return;
+  void fetchMenulists() async {
+    if (userId == null) {
+      print("User ID is null.");
+      return;
+    }
+
+    final DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    final data = userDoc.data();
+
+    if (data == null) {
+      print("No data found for user.");
+      return;
+    }
+
+    final Map<String, dynamic> userData = data as Map<String, dynamic>;
+    final List<dynamic> loadedMenulists = userData['menulists'] as List<dynamic>? ?? [];
+
+    setState(() {
+      menulists = List<Map<String, dynamic>>.from(
+        loadedMenulists.map((e) {
+          var map = e as Map<String, dynamic>;
+          String id = map['id'] as String? ?? FirebaseFirestore.instance.collection('dummy').doc().id;
+          String name = map['name'] as String? ?? 'Unnamed Menulist';
+          String description = map['description'] as String? ?? '';
+          List<dynamic> meals = map['meals'] as List<dynamic>? ?? [];
+          return {
+            'id': id,
+            'name': name,
+            'description': description,
+            'meals': meals,
+          };
+        })
+      );
+      selectedMenulists = Map.fromIterable(menulists, key: (item) => item['id'], value: (item) => false);
+    });
   }
-
-  final DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-  final data = userDoc.data();
-
-  if (data == null) {
-    print("No data found for user.");
-    return;
-  }
-
-  final Map<String, dynamic> userData = data as Map<String, dynamic>;
-  final List<dynamic> loadedMenulists = userData['menulists'] as List<dynamic>? ?? [];
-
-  setState(() {
-    menulists = List<Map<String, dynamic>>.from(
-      loadedMenulists.map((e) {
-        var map = e as Map<String, dynamic>;
-        String id = map['id'] as String? ?? 'default-id';
-        String name = map['name'] as String? ?? 'Unnamed Menulist';
-        return {
-          'id': id,
-          'name': name,
-        };
-      })
-    );
-    selectedMenulists = {
-      for (var m in menulists) m['id']: false,
-    };
-  });
-}
-
 
   void toggleMenulistSelection(String menulistId) {
     setState(() {
-      // Ensure we only toggle the selected menulist
       selectedMenulists[menulistId] = !selectedMenulists[menulistId]!;
-      print("Toggled $menulistId to ${selectedMenulists[menulistId]}"); // Debug output
     });
   }
 
   Future<void> addMealToSelectedMenulists() async {
+    if (userId == null) {
+      print("User ID is null.");
+      return;
+    }
+
+    final DocumentReference userDocRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final DocumentSnapshot userDocSnapshot = await userDocRef.get();
+    final userData = userDocSnapshot.data() as Map<String, dynamic>;
+    final List<dynamic> existingMenulists = userData['menulists'] as List<dynamic>? ?? [];
+
+    final mealData = {
+      'calories': widget.currentMeal.calories,
+      'dateTracked': widget.currentMeal.dateTracked,
+      'item name': widget.currentMeal.name,
+      'price': widget.currentMeal.price,
+      'protein': widget.currentMeal.protein,
+      'restaurant': widget.currentMeal.restaurant,
+    };
+
     for (var menulistId in selectedMenulists.keys) {
       if (selectedMenulists[menulistId]!) {
-        DocumentReference userDocRef = FirebaseFirestore.instance.collection('users').doc(userId);
-        Map<String, dynamic> mealData = {
-          'calories': widget.currentMeal.calories,
-          'dateTracked': widget.currentMeal.dateTracked,
-          'item name': widget.currentMeal.name,
-          'price': widget.currentMeal.price,
-          'protein': widget.currentMeal.protein,
-          'restaurant': widget.currentMeal.restaurant,
-        };
-
-        await userDocRef.update({
-          'menulists': FieldValue.arrayUnion([
-            {'id': menulistId, 'meals': FieldValue.arrayUnion([mealData])}
-          ])
-        });
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${widget.currentMeal.name} was added to menulist')));
+        final menulistIndex = existingMenulists.indexWhere((element) => element['id'] == menulistId);
+        if (menulistIndex != -1) {
+          List<dynamic> meals = List<dynamic>.from(existingMenulists[menulistIndex]['meals'] ?? []);
+          meals.add(mealData);
+          existingMenulists[menulistIndex]['meals'] = meals;
         }
       }
     }
+
+    await userDocRef.update({'menulists': existingMenulists});
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${widget.currentMeal.name} was added to selected menulists')),
+    );
   }
 
   @override
@@ -104,35 +116,35 @@ void fetchMenulists() async {
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => CreateMenulistPage(mealToInclude: widget.currentMeal)
-              )
+                builder: (_) => CreateMenulistPage(mealToInclude: widget.currentMeal),
+              ),
             ),
           ),
         ],
       ),
-      body: menulists.isEmpty ? Center(child: CircularProgressIndicator()) : ListView.builder(
-        itemCount: menulists.length,
-        itemBuilder: (context, index) {
-          final menulist = menulists[index];
-          final menulistId = menulist['id'] as String?;
-          final menulistName = menulist['name'] as String?;
+      body: menulists.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: menulists.length,
+              itemBuilder: (context, index) {
+                final menulist = menulists[index];
+                final menulistId = menulist['id'] as String;
+                final menulistName = menulist['name'] as String;
 
-          if (menulistId == null || menulistName == null) {
-            return Container();
-          }
+                final isSelected = selectedMenulists[menulistId] ?? false;
 
-          var isSelected = selectedMenulists[menulistId] ?? false;
-
-          return ListTile(
-            title: Text(menulistName),
-            trailing: Icon(
-              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: isSelected ? Colors.green : null,
+                return ListTile(
+                  title: Text(menulistName),
+                  trailing: Icon(
+                    isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                    color: isSelected ? Colors.green : null,
+                  ),
+                  onTap: () {
+                    toggleMenulistSelection(menulistId);
+                  },
+                );
+              },
             ),
-            onTap: () => toggleMenulistSelection(menulistId),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: addMealToSelectedMenulists,
         child: Icon(Icons.add),
