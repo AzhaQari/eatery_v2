@@ -21,7 +21,7 @@ class YourGoalsWidget extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -57,7 +57,7 @@ class YourGoalsWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 16), // Add spacing between the two boxes
+                SizedBox(width: 8), // Adjust spacing between the two boxes
                 Expanded(
                   child: SizedBox(
                     height: 120, // Set fixed height
