@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:eatery/theme.dart'; // Ensure this path is correct
 import 'package:eatery/meal_model.dart';
-import 'package:eatery/screens/meal_detail_page.dart'; // Verify this import
+import 'package:eatery/screens/Discover/meal_detail_page.dart'; // Verify this import
 
 class MealCard extends StatelessWidget {
   final Meal meal; // The current meal

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:eatery/widgets/bottom_app_bar.dart';
-import 'package:eatery/screens/edit_profile_screen.dart';
+import 'package:eatery/screens/Profile/edit_profile_screen.dart';
 import 'package:eatery/widgets/your_eats_widget.dart';
 import 'package:eatery/widgets/your_goals_widget.dart';
 import 'package:eatery/widgets/your_menus_widget.dart';

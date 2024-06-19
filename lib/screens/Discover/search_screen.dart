@@ -4,7 +4,7 @@ import 'package:algolia/algolia.dart'; // Import Algolia library
 import 'package:eatery/meal_model.dart';
 import 'package:eatery/widgets/meal_card.dart';
 import 'package:eatery/widgets/bottom_app_bar.dart';
-import 'search_feed_screen.dart'; // Import the search feed screen
+import 'package:eatery/screens/discover/search_feed_screen.dart'; // Import the search feed screen
 
 class SearchScreen extends StatefulWidget {
   @override

@@ -22,34 +22,27 @@ class YourEatsWidget extends StatelessWidget {
         }
 
         // Extract the trackedMeals array from the snapshot
-        var trackedMealsData =
-            snapshot.data!.get('trackedMeals') as List<dynamic>;
+        var trackedMealsData = snapshot.data!.get('trackedMeals') as List<dynamic>;
 
         // Convert the dynamic meals to a list of Meal objects
-        List<Meal> meals = trackedMealsData.map((mealData) {
-          return Meal.fromMap(mealData as Map<String, dynamic>);
-        }).toList();
+        List<Meal> meals = trackedMealsData.map((mealData) => Meal.fromMap(mealData as Map<String, dynamic>)).toList();
 
-        // Group meals by the 'dateTracked' field
-        Map<String, List<Meal>> mealsGroupedByDate = {};
+        // Group meals by the 'dateTracked' field using DateTime for accurate sorting
+        Map<DateTime, List<Meal>> mealsGroupedByDate = {};
         for (var meal in meals) {
-          // Format the date as 'day month, year'
-          String formattedDate =
-              DateFormat('dd MMMM, yyyy').format(meal.dateTracked);
-          mealsGroupedByDate.putIfAbsent(formattedDate, () => []).add(meal);
+          DateTime justDate = DateTime(meal.dateTracked.year, meal.dateTracked.month, meal.dateTracked.day); // Strip time part
+          mealsGroupedByDate.putIfAbsent(justDate, () => []).add(meal);
         }
 
-        // Convert the map into a list of map entries and sort by date
-        List<MapEntry<String, List<Meal>>> sortedMeals =
-            mealsGroupedByDate.entries.toList()
-              ..sort((a, b) =>
-                  b.key.compareTo(a.key)); // Display most recent dates first
+        // Convert the map into a list of map entries and sort by date in descending order
+        List<MapEntry<DateTime, List<Meal>>> sortedMeals = mealsGroupedByDate.entries.toList()
+          ..sort((a, b) => b.key.compareTo(a.key)); // Sort to display most recent dates first
 
         return ListView.builder(
           itemCount: sortedMeals.length,
           itemBuilder: (context, index) {
             var entry = sortedMeals[index];
-            var date = entry.key;
+            var date = DateFormat('dd MMMM, yyyy').format(entry.key); // Format date for display
             var mealsForDate = entry.value;
 
             return Column(
@@ -65,10 +58,8 @@ class YourEatsWidget extends StatelessWidget {
                 ...mealsForDate.map((meal) {
                   return MealCard(
                     meal: meal,
-                    meals:
-                        mealsForDate, // Pass the list of meals for this date to the MealCard
-                    index: mealsForDate.indexOf(
-                        meal), // Pass the index of the meal in the list
+                    meals: mealsForDate, // Pass the list of meals for this date to the MealCard
+                    index: mealsForDate.indexOf(meal), // Pass the index of the meal in the list
                   );
                 }).toList(),
               ],
