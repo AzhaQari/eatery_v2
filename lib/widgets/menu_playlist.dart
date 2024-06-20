@@ -34,7 +34,7 @@ class MenuPlaylist extends StatelessWidget {
             Container(
               height: 100,
               width: double.infinity,
-              margin: EdgeInsets.all(12.0),
+              margin: EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(10.0),
