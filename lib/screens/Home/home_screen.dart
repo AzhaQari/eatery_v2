@@ -2,20 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:eatery/widgets/bottom_app_bar.dart';
 import 'package:eatery/widgets/vertical_card.dart';
 import 'package:eatery/widgets/menu_playlist.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatery/theme.dart'; // Ensure this path is correct
 
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> boxTitles = ['High Protein', 'Chicken', 'Keto'];
     final List<Color> boxColors = [Colors.green, Colors.blue, Colors.orange];
-    final List<Color> menuColors = [
-      Colors.red,
-      Colors.deepOrange,
-      Colors.purple,
-      Colors.teal
-    ]; // New list of colors for MenuPlaylist
-
-    final double cardWidth = (MediaQuery.of(context).size.width - 32 - 12) / 3;
 
     return Scaffold(
       appBar: AppBar(
@@ -79,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                 children: List.generate(
                   boxTitles.length,
                   (index) => Container(
-                    width: cardWidth,
+                    width: (MediaQuery.of(context).size.width - 32 - 12) / 3,
                     child: VerticalCard(
                       title: boxTitles[index],
                       onPressed: () {},
@@ -100,21 +95,39 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 2,
-              childAspectRatio: 2.0,
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              mainAxisSpacing: 12.0,
-              crossAxisSpacing: 8.0,
-              children: List.generate(
-                4,
-                (index) => MenuPlaylist(
-                  title: 'Menu ${index + 1}',
-                  onPressed: () {},
-                  color: menuColors[index], // Set color for MenuPlaylist
-                  height: 200.0,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser?.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  final data = snapshot.data?.data() as Map<String, dynamic>?;
+                  final List<dynamic> menulists = data?['menulists'] as List<dynamic>? ?? [];
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.8,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                    ),
+                    itemCount: menulists.length,
+                    itemBuilder: (context, index) {
+                      final menulist = menulists[index] as Map<String, dynamic>;
+                      return MenuPlaylist(
+                        menulist: menulist,
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
