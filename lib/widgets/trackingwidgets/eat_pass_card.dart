@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart'; // Import the intl package
+import 'package:intl/intl.dart';
 
 class EatPassCard extends StatefulWidget {
   @override
@@ -128,13 +128,10 @@ class _EatPassCardState extends State<EatPassCard> with SingleTickerProviderStat
           borderRadius: BorderRadius.circular(10.0),
           color: Colors.blue,
         ),
-        child: Text(
-          'Eat Pass',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 22.0,
-          ),
+        child: Image.asset(
+          'lib/images/EatForHat1.png',
+          width: 100,
+          height: 100,
         ),
       ),
     );
@@ -192,8 +189,7 @@ class _EatPassCardState extends State<EatPassCard> with SingleTickerProviderStat
               formattedDate,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 14.0,
-              ),
+                fontSize: 14.0),
             ),
           ],
         ),
