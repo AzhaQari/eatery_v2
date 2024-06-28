@@ -131,8 +131,9 @@ class _MenulistWidgetState extends State<MenulistWidget> {
 
 class MenulistDetailPage extends StatefulWidget {
   final Map<String, dynamic> menulist;
+  final bool editable;
 
-  MenulistDetailPage({required this.menulist});
+  MenulistDetailPage({required this.menulist, this.editable = true});
 
   @override
   _MenulistDetailPageState createState() => _MenulistDetailPageState();
@@ -162,7 +163,8 @@ class _MenulistDetailPageState extends State<MenulistDetailPage> {
     setState(() {
       filteredMeals = meals.where((meal) {
         final mealName = meal['item name'].toString().toLowerCase();
-        return mealName.contains(query);
+        final restaurantName = meal['restaurant'].toString().toLowerCase();
+        return mealName.contains(query) || restaurantName.contains(query);
       }).toList();
     });
   }
@@ -175,14 +177,16 @@ class _MenulistDetailPageState extends State<MenulistDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(menulistName),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: () {
-              // Implement the share functionality
-            },
-          ),
-        ],
+        actions: widget.editable
+            ? [
+                IconButton(
+                  icon: Icon(Icons.share),
+                  onPressed: () {
+                    // Implement the share functionality
+                  },
+                ),
+              ]
+            : null,
       ),
       body: Column(
         children: [
@@ -190,6 +194,7 @@ class _MenulistDetailPageState extends State<MenulistDetailPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
             child: TextField(
               controller: _searchController,
+              style: TextStyle(color: Colors.black), // Ensure text color is black
               decoration: InputDecoration(
                 hintText: 'Search menu',
                 hintStyle: TextStyle(color: Colors.black),
@@ -251,12 +256,13 @@ class _MenulistDetailPageState extends State<MenulistDetailPage> {
                             ],
                           ),
                         ),
-                        IconButton(
-                          icon: Icon(Icons.edit, color: Colors.white),
-                          onPressed: () {
-                            // Implement the edit functionality
-                          },
-                        ),
+                        if (widget.editable)
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.white),
+                            onPressed: () {
+                              // Implement the edit functionality
+                            },
+                          ),
                       ],
                     ),
                   ),

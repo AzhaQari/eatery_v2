@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:eatery/screens/Profile/YourMenus/menulist_widget.dart';
+import 'package:eatery/theme.dart'; // Ensure this path is correct
 
 class VerticalCard extends StatelessWidget {
   final String title;
@@ -15,28 +17,38 @@ class VerticalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate the width based on the screen size
-    final double cardWidth = MediaQuery.of(context).size.width / 3 - 32;
-
     return GestureDetector(
-      onTap: onPressed,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MenulistDetailPage(
+              menulist: {
+                'name': title,
+                'description': 'Description for $title',
+                'meals': [], // Placeholder for meals
+              },
+              editable: false, // Indicating this is a non-editable menulist
+            ),
+          ),
+        );
+      },
       child: Container(
-        width: cardWidth, // Set the calculated width
-        height: height, // Set the height directly
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(10.0),
         ),
+        height: height,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Align(
             alignment: Alignment.bottomLeft,
             child: Text(
-              '#$title',
+              title,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 16.0,
                 fontWeight: FontWeight.bold,
+                fontSize: 18.0,
               ),
             ),
           ),
