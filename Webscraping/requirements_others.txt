@@ -1,0 +1,9 @@
+pandas~=1.4.3
+scipy~=1.11.2
+bs4~=0.0.1
+beautifulsoup4~=4.9.1
+numpy~=1.23.4
+urllib3~=1.26.13
+rapidfuzz~=2.15.0
+pygeohash~=1.2.0
+openai~=0.28.1
